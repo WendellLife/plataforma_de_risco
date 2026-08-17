@@ -1,0 +1,41 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar · Plataforma de Risco</title>
+<link rel="stylesheet" href="{% static 'ds/tokens/fonts.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/colors.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/typography.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/spacing.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/effects.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/base.css' %}">
+<link rel="stylesheet" href="{% static 'ds/app.css' %}">
+</head>
+<body class="acesso">
+  <main class="acesso__cartao">
+    <img class="acesso__logo" src="{% static 'ds/logos/logo-horizontal.png' %}" alt="Life Laboral">
+    <h1 class="acesso__titulo">Entrar na plataforma</h1>
+
+    {% if form.errors %}
+      <div class="acesso__erro" role="alert">
+        Usuário ou senha incorretos. Confira os dados e tente novamente.
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}" class="acesso__form">
+      {% csrf_token %}
+      <label class="acesso__campo">
+        <span class="acesso__rotulo">Usuário</span>
+        <input type="text" name="username" autocomplete="username" autofocus required>
+      </label>
+      <label class="acesso__campo">
+        <span class="acesso__rotulo">Senha</span>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn btn--primary acesso__enviar">Entrar</button>
+    </form>
+  </main>
+</body>
+</html>

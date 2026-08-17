@@ -84,6 +84,11 @@ TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 
+# Autenticação — o painel exige sessão; ver apps/core/views.painel
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "painel"
+LOGOUT_REDIRECT_URL = "login"
+
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
