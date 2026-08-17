@@ -9,8 +9,12 @@ from apps.core.tenancy import TenantEscopoAusente, usando_tenant
 
 @pytest.fixture
 def clientes_nos_dois_tenants(tenant_a: Tenant, tenant_b: Tenant) -> None:
-    Client.objects.create(tenant=tenant_a, legal_name="Cliente do A", tax_id="33333333000133")
-    Client.objects.create(tenant=tenant_b, legal_name="Cliente do B", tax_id="44444444000144")
+    # Cada registro nasce dentro do escopo do próprio tenant, como em produção: o
+    # manager padrão recusa escrita sem tenant no contexto, e é isso que se testa aqui.
+    with usando_tenant(tenant_a.pk):
+        Client.objects.create(tenant=tenant_a, legal_name="Cliente do A", tax_id="33333333000133")
+    with usando_tenant(tenant_b.pk):
+        Client.objects.create(tenant=tenant_b, legal_name="Cliente do B", tax_id="44444444000144")
 
 
 def test_consulta_so_ve_o_proprio_tenant(clientes_nos_dois_tenants, tenant_a: Tenant) -> None:  # noqa: ANN001
