@@ -1,0 +1,59 @@
+# Blueprint do Render — cria banco, Redis, web e worker em um passo.
+# No Render: New › Blueprint › aponte para este repositório.
+
+databases:
+  - name: risco-db
+    databaseName: risco
+    user: risco
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+
+services:
+  - type: redis
+    name: risco-redis
+    plan: starter
+    maxmemoryPolicy: noeviction   # fila Celery não pode perder tarefa
+    ipAllowList: []
+
+  - type: web
+    name: risco-web
+    runtime: python
+    plan: starter
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120"
+    healthCheckPath: /healthz
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: PYTHON_VERSION
+        value: 3.12.6
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "0"
+      - key: DATABASE_URL
+        fromDatabase: {name: risco-db, property: connectionString}
+      - key: REDIS_URL
+        fromService: {name: risco-redis, type: redis, property: connectionString}
+      - key: SIGNING_MODE
+        value: simple
+      - key: WEB_CONCURRENCY
+        value: "3"
+
+  - type: worker
+    name: risco-worker
+    runtime: python
+    plan: starter
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "celery -A config worker -Q documentos,lotes,sincronizacao,midia -l info --concurrency 2"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: PYTHON_VERSION
+        value: 3.12.6
+      - key: SECRET_KEY
+        fromService: {name: risco-web, type: web, envVarKey: SECRET_KEY}
+      - key: DATABASE_URL
+        fromDatabase: {name: risco-db, property: connectionString}
+      - key: REDIS_URL
+        fromService: {name: risco-redis, type: redis, property: connectionString}

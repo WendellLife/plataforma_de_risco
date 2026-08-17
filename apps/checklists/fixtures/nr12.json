@@ -1,0 +1,520 @@
+[
+ {
+  "library_key": "NR12-001",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "Os comandos do quadro elétrico estão sinalizados e identificados",
+  "display_order": 1
+ },
+ {
+  "library_key": "NR12-002",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "Os comandos de operação estão alimentados em extrabaixa tensão",
+  "display_order": 2
+ },
+ {
+  "library_key": "NR12-003",
+  "standard": "nr12",
+  "group_name": "Comando",
+  "statement": "Os dispositivos de partida e parada possuem redundância no acionamento",
+  "display_order": 3
+ },
+ {
+  "library_key": "NR12-004",
+  "standard": "nr12",
+  "group_name": "Comando",
+  "statement": "A inversão do motor elétrico da máquina não causa acidente ao operador",
+  "display_order": 4
+ },
+ {
+  "library_key": "NR12-005",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "Os componentes e circuitos internos do quadro elétrico possuem sinalização de identificação",
+  "display_order": 5
+ },
+ {
+  "library_key": "NR12-006",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "Os barramentos energizados no interior do quadro elétrico possuem proteção fixa que abrange totalmente a área de risco",
+  "display_order": 6
+ },
+ {
+  "library_key": "NR12-007",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "Não há acúmulo de cabos elétricos no interior do quadro elétrico",
+  "display_order": 7
+ },
+ {
+  "library_key": "NR12-008",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "Não há acúmulo, guarda ou depósito de materiais e objetos no interior do quadro elétrico",
+  "display_order": 8
+ },
+ {
+  "library_key": "NR12-009",
+  "standard": "nr12",
+  "group_name": "Aterramento",
+  "statement": "Existe projeto e laudo de aterramento da máquina que comprovam sua eficiência",
+  "display_order": 9
+ },
+ {
+  "library_key": "NR12-010",
+  "standard": "nr12",
+  "group_name": "Aterramento",
+  "statement": "Estão aterrados o invólucro, a porta do quadro elétrico e os cabos em seu interior",
+  "display_order": 10
+ },
+ {
+  "library_key": "NR12-011",
+  "standard": "nr12",
+  "group_name": "Bloqueio",
+  "statement": "A chave geral da máquina dispõe de sistema para bloqueio mecânico",
+  "display_order": 11
+ },
+ {
+  "library_key": "NR12-012",
+  "standard": "nr12",
+  "group_name": "Bloqueio",
+  "statement": "Há evidência de procedimentos de desenergização em serviços de manutenção ou reparação",
+  "display_order": 12
+ },
+ {
+  "library_key": "NR12-013",
+  "standard": "nr12",
+  "group_name": "Quadro elétrico",
+  "statement": "O quadro elétrico possui porta permanentemente fechada",
+  "display_order": 13
+ },
+ {
+  "library_key": "NR12-014",
+  "standard": "nr12",
+  "group_name": "Sinalização",
+  "statement": "O quadro elétrico possui as devidas sinalizações de risco",
+  "display_order": 14
+ },
+ {
+  "library_key": "NR12-015",
+  "standard": "nr12",
+  "group_name": "Parada de emergência",
+  "statement": "A máquina possui dispositivo de parada de emergência",
+  "display_order": 15
+ },
+ {
+  "library_key": "NR12-016",
+  "standard": "nr12",
+  "group_name": "Parada de emergência",
+  "statement": "A máquina possui número suficiente de dispositivos de parada de emergência",
+  "display_order": 16
+ },
+ {
+  "library_key": "NR12-017",
+  "standard": "nr12",
+  "group_name": "Parada de emergência",
+  "statement": "O dispositivo de parada de emergência possui dois blocos de contatos redundantes",
+  "display_order": 17
+ },
+ {
+  "library_key": "NR12-018",
+  "standard": "nr12",
+  "group_name": "Parada de emergência",
+  "statement": "O dispositivo de parada de emergência possui sinalização de identificação correta",
+  "display_order": 18
+ },
+ {
+  "library_key": "NR12-019",
+  "standard": "nr12",
+  "group_name": "Parada de emergência",
+  "statement": "O acionamento da parada de emergência não gera risco adicional ao operador",
+  "display_order": 19
+ },
+ {
+  "library_key": "NR12-020",
+  "standard": "nr12",
+  "group_name": "Parada de emergência",
+  "statement": "A parada de emergência é de rearme manual e não permite religamento automático",
+  "display_order": 20
+ },
+ {
+  "library_key": "NR12-021",
+  "standard": "nr12",
+  "group_name": "Proteções fixas",
+  "statement": "As proteções fixas são mantidas por elementos que exigem ferramenta para remoção",
+  "display_order": 21
+ },
+ {
+  "library_key": "NR12-022",
+  "standard": "nr12",
+  "group_name": "Proteções fixas",
+  "statement": "As proteções impedem o acesso à zona de perigo pelas laterais e pela parte superior",
+  "display_order": 22
+ },
+ {
+  "library_key": "NR12-023",
+  "standard": "nr12",
+  "group_name": "Proteções fixas",
+  "statement": "As proteções respeitam as distâncias de segurança da ABNT NBR ISO 13857",
+  "display_order": 23
+ },
+ {
+  "library_key": "NR12-024",
+  "standard": "nr12",
+  "group_name": "Proteções fixas",
+  "statement": "As proteções são resistentes e não geram pontos de agarramento ou aprisionamento",
+  "display_order": 24
+ },
+ {
+  "library_key": "NR12-025",
+  "standard": "nr12",
+  "group_name": "Proteções móveis",
+  "statement": "As proteções móveis são associadas a dispositivo de intertravamento",
+  "display_order": 25
+ },
+ {
+  "library_key": "NR12-026",
+  "standard": "nr12",
+  "group_name": "Proteções móveis",
+  "statement": "O intertravamento possui bloqueio quando o tempo de parada é maior que o tempo de acesso",
+  "display_order": 26
+ },
+ {
+  "library_key": "NR12-027",
+  "standard": "nr12",
+  "group_name": "Proteções móveis",
+  "statement": "Os dispositivos de intertravamento não podem ser burlados de forma simples",
+  "display_order": 27
+ },
+ {
+  "library_key": "NR12-028",
+  "standard": "nr12",
+  "group_name": "Dispositivos de segurança",
+  "statement": "As cortinas de luz possuem categoria compatível com a apreciação de risco",
+  "display_order": 28
+ },
+ {
+  "library_key": "NR12-029",
+  "standard": "nr12",
+  "group_name": "Dispositivos de segurança",
+  "statement": "A resolução e o posicionamento da cortina de luz impedem o alcance da zona de perigo",
+  "display_order": 29
+ },
+ {
+  "library_key": "NR12-030",
+  "standard": "nr12",
+  "group_name": "Dispositivos de segurança",
+  "statement": "Os dispositivos de segurança possuem certificado válido e rastreável",
+  "display_order": 30
+ },
+ {
+  "library_key": "NR12-031",
+  "standard": "nr12",
+  "group_name": "Dispositivos de segurança",
+  "statement": "Há validação periódica dos sistemas de segurança, com registro",
+  "display_order": 31
+ },
+ {
+  "library_key": "NR12-032",
+  "standard": "nr12",
+  "group_name": "Sistema de comando",
+  "statement": "As partes do sistema de comando relacionadas à segurança atendem à categoria definida na apreciação",
+  "display_order": 32
+ },
+ {
+  "library_key": "NR12-033",
+  "standard": "nr12",
+  "group_name": "Sistema de comando",
+  "statement": "Há relé ou controlador de segurança dedicado às funções de segurança",
+  "display_order": 33
+ },
+ {
+  "library_key": "NR12-034",
+  "standard": "nr12",
+  "group_name": "Sistema de comando",
+  "statement": "A falha de um componente não leva à perda da função de segurança",
+  "display_order": 34
+ },
+ {
+  "library_key": "NR12-035",
+  "standard": "nr12",
+  "group_name": "Sistema pneumático",
+  "statement": "O sistema pneumático possui válvula de bloqueio com purga acessível ao operador",
+  "display_order": 35
+ },
+ {
+  "library_key": "NR12-036",
+  "standard": "nr12",
+  "group_name": "Sistema pneumático",
+  "statement": "Há dispositivo que impede a queda de partes por perda de pressão",
+  "display_order": 36
+ },
+ {
+  "library_key": "NR12-037",
+  "standard": "nr12",
+  "group_name": "Sistema hidráulico",
+  "statement": "O sistema hidráulico possui manômetro e válvula de alívio",
+  "display_order": 37
+ },
+ {
+  "library_key": "NR12-038",
+  "standard": "nr12",
+  "group_name": "Sistema hidráulico",
+  "statement": "As mangueiras hidráulicas estão protegidas contra abrasão e projeção",
+  "display_order": 38
+ },
+ {
+  "library_key": "NR12-039",
+  "standard": "nr12",
+  "group_name": "Sistema hidráulico",
+  "statement": "Há dispositivo de retenção contra descida por gravidade no circuito hidráulico",
+  "display_order": 39
+ },
+ {
+  "library_key": "NR12-040",
+  "standard": "nr12",
+  "group_name": "Transportadores",
+  "statement": "Os transportadores contínuos possuem proteção nos pontos de agarramento",
+  "display_order": 40
+ },
+ {
+  "library_key": "NR12-041",
+  "standard": "nr12",
+  "group_name": "Transportadores",
+  "statement": "Há cabo de parada de emergência ao longo do transportador",
+  "display_order": 41
+ },
+ {
+  "library_key": "NR12-042",
+  "standard": "nr12",
+  "group_name": "Transportadores",
+  "statement": "As passarelas sobre transportadores possuem guarda-corpo e rodapé",
+  "display_order": 42
+ },
+ {
+  "library_key": "NR12-043",
+  "standard": "nr12",
+  "group_name": "Ergonomia",
+  "statement": "A altura do posto de trabalho permite postura adequada durante a operação",
+  "display_order": 43
+ },
+ {
+  "library_key": "NR12-044",
+  "standard": "nr12",
+  "group_name": "Ergonomia",
+  "statement": "Os dispositivos de comando estão ao alcance do operador sem esforço adicional",
+  "display_order": 44
+ },
+ {
+  "library_key": "NR12-045",
+  "standard": "nr12",
+  "group_name": "Ergonomia",
+  "statement": "A iluminação do posto de operação é adequada à tarefa",
+  "display_order": 45
+ },
+ {
+  "library_key": "NR12-046",
+  "standard": "nr12",
+  "group_name": "Ergonomia",
+  "statement": "O nível de ruído no posto de operação está dentro dos limites da NR-15",
+  "display_order": 46
+ },
+ {
+  "library_key": "NR12-047",
+  "standard": "nr12",
+  "group_name": "Acesso",
+  "statement": "As plataformas de acesso possuem piso antiderrapante e guarda-corpo",
+  "display_order": 47
+ },
+ {
+  "library_key": "NR12-048",
+  "standard": "nr12",
+  "group_name": "Acesso",
+  "statement": "As escadas de acesso atendem aos requisitos dimensionais do Anexo I da NR-12",
+  "display_order": 48
+ },
+ {
+  "library_key": "NR12-049",
+  "standard": "nr12",
+  "group_name": "Acesso",
+  "statement": "As vias de circulação em torno da máquina estão desobstruídas e demarcadas",
+  "display_order": 49
+ },
+ {
+  "library_key": "NR12-050",
+  "standard": "nr12",
+  "group_name": "Sinalização",
+  "statement": "A máquina possui sinalização de advertência de todos os riscos residuais",
+  "display_order": 50
+ },
+ {
+  "library_key": "NR12-051",
+  "standard": "nr12",
+  "group_name": "Sinalização",
+  "statement": "A sinalização está em português e é legível na distância de aproximação",
+  "display_order": 51
+ },
+ {
+  "library_key": "NR12-052",
+  "standard": "nr12",
+  "group_name": "Sinalização",
+  "statement": "As tubulações e componentes estão identificados por cor conforme norma",
+  "display_order": 52
+ },
+ {
+  "library_key": "NR12-053",
+  "standard": "nr12",
+  "group_name": "Manuais e procedimentos",
+  "statement": "O manual de instruções está disponível em português no posto de operação",
+  "display_order": 53
+ },
+ {
+  "library_key": "NR12-054",
+  "standard": "nr12",
+  "group_name": "Manuais e procedimentos",
+  "statement": "Existe procedimento de trabalho e segurança escrito, derivado da apreciação de risco",
+  "display_order": 54
+ },
+ {
+  "library_key": "NR12-055",
+  "standard": "nr12",
+  "group_name": "Manuais e procedimentos",
+  "statement": "Os procedimentos de limpeza e ajuste preveem a máquina parada e bloqueada",
+  "display_order": 55
+ },
+ {
+  "library_key": "NR12-056",
+  "standard": "nr12",
+  "group_name": "Capacitação",
+  "statement": "Os operadores possuem capacitação conforme o Anexo II da NR-12, com registro",
+  "display_order": 56
+ },
+ {
+  "library_key": "NR12-057",
+  "standard": "nr12",
+  "group_name": "Capacitação",
+  "statement": "A capacitação foi ministrada por profissional habilitado e possui carga horária registrada",
+  "display_order": 57
+ },
+ {
+  "library_key": "NR12-058",
+  "standard": "nr12",
+  "group_name": "Capacitação",
+  "statement": "Há reciclagem periódica registrada para operadores e manutentores",
+  "display_order": 58
+ },
+ {
+  "library_key": "NR12-059",
+  "standard": "nr12",
+  "group_name": "Manutenção",
+  "statement": "Existe plano de manutenção preventiva com registro das intervenções",
+  "display_order": 59
+ },
+ {
+  "library_key": "NR12-060",
+  "standard": "nr12",
+  "group_name": "Manutenção",
+  "statement": "As intervenções de manutenção são registradas em sistema informatizado",
+  "display_order": 60
+ },
+ {
+  "library_key": "NR12-061",
+  "standard": "nr12",
+  "group_name": "Manutenção",
+  "statement": "A manutenção é executada por profissional capacitado e autorizado",
+  "display_order": 61
+ },
+ {
+  "library_key": "NR12-062",
+  "standard": "nr12",
+  "group_name": "Robôs",
+  "statement": "A célula robotizada possui perímetro protegido e dispositivo de presença",
+  "display_order": 62
+ },
+ {
+  "library_key": "NR12-063",
+  "standard": "nr12",
+  "group_name": "Robôs",
+  "statement": "O robô possui dispositivo de habilitação para operação em modo manual",
+  "display_order": 63
+ },
+ {
+  "library_key": "NR12-064",
+  "standard": "nr12",
+  "group_name": "Prensas",
+  "statement": "A prensa possui dispositivo de comando bimanual conforme Anexo VIII",
+  "display_order": 64
+ },
+ {
+  "library_key": "NR12-065",
+  "standard": "nr12",
+  "group_name": "Prensas",
+  "statement": "O freio e a embreagem da prensa possuem monitoramento de sobrepasso",
+  "display_order": 65
+ },
+ {
+  "library_key": "NR12-066",
+  "standard": "nr12",
+  "group_name": "Prensas",
+  "statement": "A prensa possui registro de inspeção de segurança semestral",
+  "display_order": 66
+ },
+ {
+  "library_key": "NR12-067",
+  "standard": "nr12",
+  "group_name": "Injetoras",
+  "statement": "A injetora possui proteção móvel intertravada na zona de fechamento do molde",
+  "display_order": 67
+ },
+ {
+  "library_key": "NR12-068",
+  "standard": "nr12",
+  "group_name": "Injetoras",
+  "statement": "A injetora possui proteção da zona de dosagem e do canhão aquecido",
+  "display_order": 68
+ },
+ {
+  "library_key": "NR12-069",
+  "standard": "nr12",
+  "group_name": "Cilindros",
+  "statement": "O cilindro de massa possui dispositivo de parada de emergência tipo barra",
+  "display_order": 69
+ },
+ {
+  "library_key": "NR12-070",
+  "standard": "nr12",
+  "group_name": "Serras",
+  "statement": "A serra circular possui coifa protetora e cutelo divisor",
+  "display_order": 70
+ },
+ {
+  "library_key": "NR12-071",
+  "standard": "nr12",
+  "group_name": "Serras",
+  "statement": "A serra possui coletor de resíduos e sistema de exaustão",
+  "display_order": 71
+ },
+ {
+  "library_key": "NR12-072",
+  "standard": "nr12",
+  "group_name": "Motosserras",
+  "statement": "A motosserra possui freio de corrente e trava de segurança do acelerador",
+  "display_order": 72
+ },
+ {
+  "library_key": "NR12-073",
+  "standard": "nr12",
+  "group_name": "Máquinas agrícolas",
+  "statement": "A máquina agrícola possui proteção da tomada de potência",
+  "display_order": 73
+ },
+ {
+  "library_key": "NR12-074",
+  "standard": "nr12",
+  "group_name": "Elevadores",
+  "statement": "O elevador de carga possui dispositivo contra queda livre e sinalização de capacidade",
+  "display_order": 74
+ }
+]

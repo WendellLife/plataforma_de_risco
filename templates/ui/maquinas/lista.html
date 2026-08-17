@@ -1,0 +1,30 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Máquinas{% endblock %}
+{% block crumbs %}<span>Máquinas</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Parque de ativos</div>
+    <h1>Máquinas</h1>
+    <p>Consulta do parque com situação documental por ativo.</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="btn btn--primary" href="/admin/ativos/machine/add/">Cadastrar máquina</a>
+  </div>
+</div>
+
+<form class="toolbar" hx-get="{% url 'maquinas' %}" hx-target="#tabela" hx-trigger="input changed delay:300ms, change">
+  <input class="field" type="search" name="q" value="{{ busca }}" placeholder="Identificação ou número de série" style="min-width:280px">
+  <select class="field" name="status">
+    <option value="active" {% if status == 'active' %}selected{% endif %}>Ativas</option>
+    <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inativas</option>
+    <option value="" {% if not status %}selected{% endif %}>Todas</option>
+  </select>
+  <span class="htmx-indicator" style="font:600 12px/1 var(--font-body);color:var(--text-muted)">Buscando…</span>
+</form>
+
+<div class="card" style="padding:0;overflow:hidden" id="tabela">
+  {% include "ui/maquinas/_tabela.html" %}
+</div>
+{% endblock %}

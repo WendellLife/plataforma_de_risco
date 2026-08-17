@@ -1,0 +1,39 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Clientes{% endblock %}
+{% block crumbs %}<span>Clientes</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Carteira</div>
+    <h1>Clientes</h1>
+    <p>Empresas atendidas, com o tamanho do parque de cada uma.</p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="btn btn--primary" href="/admin/clientes/client/add/">Cadastrar cliente</a>
+  </div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+{% if clientes %}
+<table class="table">
+  <thead><tr><th>Razão social</th><th>CNPJ</th><th>CNAE</th><th>Máquinas</th></tr></thead>
+  <tbody>
+    {% for c in clientes %}
+    <tr>
+      <td style="font-weight:700;color:var(--text-strong)">{{ c.legal_name }}</td>
+      <td class="mono">{{ c.tax_id }}</td>
+      <td>{{ c.cnae|default:"—" }}</td>
+      <td>{{ c.n_maquinas }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty">
+  <div class="empty__title">Nenhum cliente cadastrado</div>
+  <div class="empty__msg">Cadastre o primeiro cliente para começar.</div>
+</div>
+{% endif %}
+</div>
+{% endblock %}

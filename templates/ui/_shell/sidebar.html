@@ -1,0 +1,26 @@
+{% load static %}
+<aside class="sidebar">
+  <img class="sidebar__logo" src="{% static 'ds/logos/logo-horizontal.png' %}" alt="Life Laboral">
+
+  {% if shell.tenant %}
+  <div class="sidebar__context">
+    <span style="font:700 9.5px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Organização</span>
+    <span style="font:700 13.5px/1.3 var(--font-display);color:var(--text-strong)">{{ shell.tenant.legal_name }}</span>
+    <span style="font:400 11.5px/1.4 var(--font-body);color:var(--text-muted)">{{ shell.perfil }}</span>
+  </div>
+  {% endif %}
+
+  <nav class="sidebar__nav">
+    <span class="sidebar__group">Trabalho</span>
+    <a class="navitem" href="{% url 'painel' %}" {% if request.resolver_match.url_name == 'painel' %}aria-current="page"{% endif %}>Painel de adequação</a>
+    <a class="navitem" href="{% url 'maquinas' %}" {% if request.resolver_match.url_name == 'maquinas' %}aria-current="page"{% endif %}>Máquinas</a>
+    <a class="navitem" href="{% url 'clientes' %}" {% if request.resolver_match.url_name == 'clientes' %}aria-current="page"{% endif %}>Clientes</a>
+
+    <span class="sidebar__group">Saídas</span>
+    <a class="navitem" href="#" aria-disabled="true" style="opacity:.45;cursor:not-allowed" title="Sprint 5">Documentos</a>
+    <a class="navitem" href="#" aria-disabled="true" style="opacity:.45;cursor:not-allowed" title="Sprint 8">Plano de ação</a>
+
+    <span class="sidebar__group">Conta</span>
+    <a class="navitem" href="/admin/">Administração</a>
+  </nav>
+</aside>

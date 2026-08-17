@@ -1,0 +1,16 @@
+/* Life Laboral — Webfonts
+ *
+ * TRUE BRAND FONT: **Codec Pro** (Zetafonts, commercial) — found embedded as
+ * CodecPro-Regular / CodecPro-Bold in the institutional A4 receituário.
+ * **Poppins Bold** is also embedded in the same file, and Helvetica World
+ * (Regular/Bold) sets the business card.
+ *
+ * No font binaries were supplied, so this system ships free equivalents:
+ *   --font-display → Poppins   (used in the real collateral; geometric sans,
+ *                               nearest free match to Codec Pro's display cut)
+ *   --font-body    → Figtree   (geometric-humanist, closest free match to
+ *                               Codec Pro Regular at text sizes)
+ * → If you license Codec Pro, drop the .woff2 files beside this file and
+ *   replace the @import with @font-face rules pointing at them.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,600&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');

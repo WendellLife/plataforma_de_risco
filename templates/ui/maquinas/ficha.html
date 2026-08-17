@@ -1,0 +1,81 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}{{ maquina.name }}{% endblock %}
+{% block crumbs %}<a href="{% url 'maquinas' %}">Máquinas</a><span>›</span><span>{{ maquina.name }}</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ maquina.client.legal_name }}{% if maquina.org_unit %} · {{ maquina.org_unit.caminho }}{% endif %}</div>
+    <h1>{{ maquina.name }}</h1>
+    <p>
+      {{ maquina.manufacturer|default:"Fabricante não informado" }}
+      {% if maquina.model %} · {{ maquina.model }}{% endif %}
+      {% if maquina.year %} · {{ maquina.year }}{% endif %}
+      {% if maquina.serial_number %} · série <span class="mono">{{ maquina.serial_number }}</span>{% endif %}
+    </p>
+  </div>
+</div>
+
+{% with faltando=maquina.fontes_sem_bloqueio %}
+{% if faltando %}
+<div class="blocker" style="margin-bottom:20px">
+  <span class="blocker__rule">D-01</span>
+  <span>
+    <span class="blocker__title">Procedimento LOTO e laudo técnico bloqueados</span>
+    <span class="blocker__msg">
+      {{ faltando|length }} fonte{{ faltando|length|pluralize }} de energia sem ponto de bloqueio definido.
+      Defina o ponto em cada fonte abaixo para liberar a emissão.
+    </span>
+  </span>
+  <a class="btn btn--outline" href="/admin/ativos/lockoutpoint/add/">Definir ponto</a>
+</div>
+{% endif %}
+{% endwith %}
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <h2 style="margin:0 0 12px;font:700 15px/1.3 var(--font-display);color:var(--text-strong)">Fontes de energia</h2>
+    {% if fontes %}
+    <table class="table">
+      <thead><tr><th>Fonte</th><th>Ponto de bloqueio</th></tr></thead>
+      <tbody>
+        {% for f in fontes %}
+        <tr>
+          <td><strong>{{ f.get_kind_display }}</strong> <span class="mono">{{ f.magnitude|floatformat:"-3" }} {{ f.unit }}</span></td>
+          <td>
+            {% if f.lockout_point %}
+              <span class="pill pill--ok">{{ f.lockout_point.identifier }}</span>
+            {% else %}
+              <span class="pill pill--danger">Sem ponto de bloqueio</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty__msg">Nenhuma fonte de energia cadastrada. Sem fonte, o LOTO não pode ser derivado.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 12px;font:700 15px/1.3 var(--font-display);color:var(--text-strong)">Componentes de segurança</h2>
+    {% if componentes %}
+    <table class="table">
+      <thead><tr><th>Dispositivo</th><th>Certificado</th><th>Validade</th></tr></thead>
+      <tbody>
+        {% for c in componentes %}
+        <tr>
+          <td><strong>{{ c.kind }}</strong> {{ c.manufacturer }}</td>
+          <td class="mono">{{ c.certificate_number|default:"—" }}</td>
+          <td>{{ c.certificate_valid_until|date:"d/m/Y"|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty__msg">Nenhum componente de segurança cadastrado.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

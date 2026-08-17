@@ -1,0 +1,44 @@
+{% if maquinas %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Identificação</th>
+      <th>Cliente</th>
+      <th>Setor</th>
+      <th>Série</th>
+      <th>Energia</th>
+      <th>Situação</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for m in maquinas %}
+    <tr>
+      <td><a href="{% url 'ficha_maquina' m.public_uuid %}" style="font-weight:700;color:var(--text-strong)">{{ m.name }}</a></td>
+      <td>{{ m.client.legal_name }}</td>
+      <td>{{ m.org_unit.name|default:"—" }}</td>
+      <td class="mono">{{ m.serial_number|default:"—" }}</td>
+      <td>{{ m.n_fontes }} fonte{{ m.n_fontes|pluralize }}</td>
+      <td>
+        {% if m.n_fontes_sem_bloqueio %}
+          <span class="pill pill--danger">D-01 · {{ m.n_fontes_sem_bloqueio }} sem bloqueio</span>
+        {% elif m.n_fontes %}
+          <span class="pill pill--ok">Pronta para LOTO</span>
+        {% else %}
+          <span class="pill pill--muted">Sem fonte cadastrada</span>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty">
+  {% if busca %}
+    <div class="empty__title">Nenhuma máquina para “{{ busca }}”</div>
+    <div class="empty__msg">Verifique a identificação ou o número de série, ou limpe o filtro.</div>
+  {% else %}
+    <div class="empty__title">Nenhuma máquina cadastrada</div>
+    <div class="empty__msg">Cadastre o primeiro ativo para começar a apreciação de risco.</div>
+  {% endif %}
+</div>
+{% endif %}

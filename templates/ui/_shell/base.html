@@ -1,0 +1,25 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}Plataforma de Risco{% endblock %} · Life Laboral</title>
+<link rel="stylesheet" href="{% static 'ds/tokens/fonts.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/colors.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/typography.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/spacing.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/effects.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/base.css' %}">
+<link rel="stylesheet" href="{% static 'ds/app.css' %}">
+<script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+</head>
+<body>
+<div class="shell">
+  {% include "ui/_shell/sidebar.html" %}
+  <div class="main">
+    {% include "ui/_shell/topbar.html" %}
+    <main class="content">{% block conteudo %}{% endblock %}</main>
+  </div>
+</div>
+</body>
+</html>

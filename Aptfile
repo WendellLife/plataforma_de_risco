@@ -1,0 +1,6 @@
+# Bibliotecas de sistema exigidas pelo WeasyPrint (geração de PDF, sprint 5).
+libpango-1.0-0
+libpangoft2-1.0-0
+libcairo2
+libgdk-pixbuf-2.0-0
+shared-mime-info
