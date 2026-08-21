@@ -40,6 +40,7 @@ from apps.planos.services import (
     concluir_acao,
     criar_acao,
     gerar_acoes_de_nao_conformidade,
+    marcar_bloqueante,
     repactuar_prazo,
 )
 from apps.risco.enums import EstimateKind, Iso12100Step, Iso12100Type

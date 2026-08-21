@@ -120,7 +120,6 @@ def sincronizar_bloqueios(*, documento: Document, contexto: Contexto) -> int:
     return len(contexto.bloqueios)
 
 
-@transaction.atomic
 def publicar(*, documento: Document, actor: User) -> DocumentVersion:
     """Publica uma nova versão. Recusa em bloco, com todas as violações de uma vez."""
     template = documento.template
@@ -133,11 +132,23 @@ def publicar(*, documento: Document, actor: User) -> DocumentVersion:
             f"{template.nome} é peça de responsabilidade técnica — somente engenheiro publica."
         )
 
+    # A recusa precisa SOBREVIVER à chamada: é a lista que o usuário vai corrigir. Por
+    # isso a verificação roda fora da transação — dentro dela, o raise desfaria tanto os
+    # PublicationBlock recém-gravados quanto o status BLOCKED.
     contexto = montar(documento=documento)
     sincronizar_bloqueios(documento=documento, contexto=contexto)
     if contexto.bloqueios:
         raise PublicacaoBloqueada(contexto.bloqueios)
 
+    with transaction.atomic():
+        versao = _gravar_versao(documento=documento, contexto=contexto, actor=actor)
+    # Fora da transação: o worker não pode ver uma versão ainda não confirmada.
+    _agendar_composicao(versao)
+    return versao
+
+
+def _gravar_versao(*, documento: Document, contexto: Contexto, actor: User) -> DocumentVersion:
+    template = documento.template
     payload = contexto.as_dict()
     versao = DocumentVersion.objects.create(
         tenant_id=require_tenant(),
@@ -171,7 +182,6 @@ def publicar(*, documento: Document, actor: User) -> DocumentVersion:
             "avisos": len(contexto.avisos),
         },
     )
-    _agendar_composicao(versao)
     return versao
 
 

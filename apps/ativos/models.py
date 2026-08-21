@@ -91,6 +91,8 @@ class Machine(RegistroTenant):
 
 
 class LockoutPoint(RegistroTenant):
+    caminho_para_cliente = "machine__client_id"
+
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE, related_name="lockout_points")
     identifier = models.CharField("identificação física", max_length=40)
     location = models.CharField("localização", max_length=200, blank=True)
@@ -114,6 +116,8 @@ class LockoutPoint(RegistroTenant):
 
 
 class EnergySource(RegistroTenant):
+    caminho_para_cliente = "machine__client_id"
+
     """Fonte de energia TIPADA — nunca string livre (Espec 02, decisão estrutural)."""
 
     machine = models.ForeignKey(Machine, on_delete=models.PROTECT, related_name="energy_sources")
@@ -152,6 +156,8 @@ class EnergySource(RegistroTenant):
 
 
 class Component(RegistroTenant):
+    caminho_para_cliente = "machine__client_id"
+
     """Dispositivo de segurança instalado, com validade de certificado."""
 
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE, related_name="components")
@@ -174,6 +180,9 @@ class Component(RegistroTenant):
 
 
 class Photo(RegistroTenant):
+    # machine é opcional: foto sem máquina não pertence a cliente algum e some do filtro.
+    caminho_para_cliente = "machine__client_id"
+
     machine = models.ForeignKey(
         Machine, null=True, blank=True, on_delete=models.CASCADE, related_name="photos"
     )

@@ -142,7 +142,10 @@ def test_qr_e_url_entram_no_documento_publicado(publicado, settings) -> None:  #
 def test_minuta_nao_imprime_qr(maquina, engenheiro_a) -> None:  # noqa: ANN001
     doc = criar_documento(machine=maquina, template_code="DOC03", actor=engenheiro_a)
     html = html_do_documento(documento=doc, contexto=montar(documento=doc))
-    assert "Verificação pública" not in html
+    # A folha de estilo é embutida no documento e cita a expressão num comentário; por
+    # isso a asserção mira o bloco renderizado, não a string solta.
+    assert 'class="verificacao-qr"' not in html
+    assert "<strong>Verificação pública.</strong>" not in html
     assert "MINUTA" in html
 
 

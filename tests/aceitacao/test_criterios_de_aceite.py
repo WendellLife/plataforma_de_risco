@@ -31,6 +31,8 @@ from apps.checklists.services import abrir_aplicacao, encerrar_coleta, responder
 from apps.clientes.enums import PersonRole
 from apps.clientes.models import Person
 from apps.clientes.services import criar_cliente
+from apps.core.carteira import atribuir_cliente
+from apps.core.tenancy import usando_tenant
 from apps.core.enums import AuditAction
 from apps.core.models import AuditLog, User
 from apps.documentos.renderizacao import html_do_documento
@@ -162,9 +164,22 @@ def test_ca02_recomendacao_incompativel_nunca_alcanca_documento(
 
 # ------------------------------------------------------------------------------- CA-03
 
-def test_ca03_loto_derivado_das_fontes_reais(cliente, engenheiro_a) -> None:  # noqa: ANN001
+def test_ca03_loto_derivado_das_fontes_reais(cliente, tenant_a, engenheiro_a) -> None:  # noqa: ANN001
     """Uma etapa por fonte cadastrada; fonte sem ponto de bloqueio impede a emissão."""
-    m = criar_maquina(client_id=cliente.pk, name="Serra fita", actor=engenheiro_a)
+    # Projeto com engenheiro e ART para que a única regra em jogo seja a D-01: sem ele,
+    # a D-07 recusaria antes e o critério de aceite não chegaria a ser exercitado.
+    responsavel = Person.objects.create(
+        tenant=tenant_a, name="Wendell Engenheiro", doc_kind="cpf", doc_number="11122233355",
+        roles=[PersonRole.ENGINEER], council="CREA", council_state="SP",
+        council_number="5069123457", professional_title="Engenheiro de Segurança do Trabalho",
+    )
+    projeto = Project.objects.create(
+        tenant=tenant_a, client=cliente, number="ACE-3-001", art_number="SP20260819-0003",
+        engineer=responsavel, status="active",
+    )
+    m = criar_maquina(
+        client_id=cliente.pk, name="Serra fita", actor=engenheiro_a, project=projeto
+    )
     eletrica = acrescentar_fonte_de_energia(
         machine=m, kind=EnergyKind.ELECTRIC, magnitude=Decimal("380"), unit="V",
         actor=engenheiro_a,
@@ -376,12 +391,19 @@ def test_ca09_pela_interface_tambem(perigo, maquina, analista, engenheiro_a, cli
     doc = criar_documento(machine=maquina, template_code="DOC01", actor=engenheiro_a)
     analista.set_password("senha-muito-longa-1")
     analista.save()
+    # O cliente precisa estar na carteira do analista: sem isso o documento nem aparece
+    # para ele (404 pela carteira) e a barreira de PERFIL — que é o que a CA-09 exige —
+    # nunca chegaria a ser exercitada.
+    atribuir_cliente(user=analista, client=maquina.client, actor=engenheiro_a)
     client.force_login(analista)
 
     resposta = client.post(reverse("publicar_documento", args=[doc.public_uuid]))
     assert resposta.status_code in (302, 403)
-    doc.refresh_from_db()
-    assert doc.versions.count() == 0
+    # O middleware zera o contexto ao encerrar a requisição — correto em produção, onde
+    # cada requisição é independente. Para conferir o banco, reentra-se no escopo.
+    with usando_tenant(maquina.tenant_id):
+        doc.refresh_from_db()
+        assert doc.versions.count() == 0
 
 
 # ------------------------------------------------------------------------------- CA-10

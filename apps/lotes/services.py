@@ -99,11 +99,14 @@ def planejar_lote(
     return planejar(template_code, candidatas)
 
 
-@transaction.atomic
 def abrir_lote(
     *, template_code: str, plano: Plano, actor: User, client: Client | None = None
 ) -> IssueBatch:
-    """Grava o lote e seus itens a partir do plano já mostrado ao usuário."""
+    """Grava o lote e seus itens a partir do plano já mostrado ao usuário.
+
+    As recusas ficam FORA da transação de gravação: dentro dela, o raise desfaria a
+    própria trilha de auditoria que registra a tentativa negada.
+    """
     if plano.vazio:
         raise LoteVazio(
             f"Nenhuma máquina elegível para {template_code}. "
@@ -122,6 +125,15 @@ def abrir_lote(
             "individualmente ou em lote."
         )
 
+    with transaction.atomic():
+        return _gravar_lote(
+            template_code=template_code, plano=plano, actor=actor, client=client
+        )
+
+
+def _gravar_lote(
+    *, template_code: str, plano: Plano, actor: User, client: Client | None = None
+) -> IssueBatch:
     sequencia = IssueBatch.objects.count() + 1
     lote = IssueBatch.objects.create(
         tenant_id=require_tenant(),

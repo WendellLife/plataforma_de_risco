@@ -58,6 +58,7 @@ def _maquina_pronta(cliente, tenant_a, responsavel, engenheiro_a, nome: str) -> 
     """Máquina completa: fonte de energia COM ponto de bloqueio — passa em D-01."""
     projeto = Project.objects.create(
         tenant=tenant_a, client=cliente, number=f"LT-{nome[:6]}",
+        art_number=f"SP2026-{nome[:2]}",  # D-07 exige ART: sem ela a recusa viria pela regra errada
         engineer=responsavel, status="active",
     )
     m = criar_maquina(
@@ -75,6 +76,7 @@ def _maquina_travada(cliente, tenant_a, responsavel, engenheiro_a, nome: str) ->
     """Fonte SEM ponto de bloqueio — trava em D-01, de propósito."""
     projeto = Project.objects.create(
         tenant=tenant_a, client=cliente, number=f"LT-{nome[:6]}",
+        art_number=f"SP2026-{nome[:2]}",  # D-07 exige ART: sem ela a recusa viria pela regra errada
         engineer=responsavel, status="active",
     )
     m = criar_maquina(
@@ -197,8 +199,10 @@ def test_falha_de_uma_nao_desfaz_as_outras(
     )
 
     # Sabota a segunda máquina DEPOIS da triagem: simula cadastro mudando no meio.
+    # Some com o PONTO DE BLOQUEIO, não com a fonte: D-01 acusa fonte existente sem
+    # bloqueio, então apagar a fonte inteira faria a violação desaparecer.
     alvo = boas[1]
-    alvo.energy_sources.all().delete()
+    alvo.energy_sources.update(lockout_point=None)
 
     executar_lote(batch_id=lote.pk, actor_id=engenheiro_a.pk)
     lote.refresh_from_db()
@@ -218,7 +222,7 @@ def test_bloqueio_surgido_apos_a_triagem_nomeia_a_regra(
     lote = abrir_lote(
         template_code="DOC02", plano=plano, actor=engenheiro_a, client=cliente
     )
-    maquina.energy_sources.all().delete()
+    maquina.energy_sources.update(lockout_point=None)  # ver nota em D-01 acima
     executar_lote(batch_id=lote.pk, actor_id=engenheiro_a.pk)
 
     resultado = detalhe(IssueBatch.objects.get(pk=lote.pk))

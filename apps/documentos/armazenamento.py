@@ -21,7 +21,7 @@ from dataclasses import dataclass
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.files.storage import InvalidStorageBackendError, storages
+from django.core.files.storage import InvalidStorageError, storages
 
 ALIAS = "documentos"
 
@@ -40,7 +40,7 @@ class Artefato:
 def backend():  # noqa: ANN201 - Storage do Django
     try:
         return storages[ALIAS]
-    except InvalidStorageBackendError:
+    except InvalidStorageError:
         return storages["default"]
 
 

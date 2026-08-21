@@ -116,7 +116,8 @@ def test_admin_ve_a_tela_de_acesso(client, admin: User, tecnico: User) -> None: 
     assert resposta.status_code == 200
     corpo = resposta.content.decode()
     assert tecnico.email in corpo
-    assert "sem clientes atribuídos" in corpo.lower() or "sem carteira" in corpo.lower()
+    # A tela precisa NOMEAR quem está sem carteira — o texto exato é o do template.
+    assert "sem nenhum cliente atribuído" in corpo.lower()
 
 
 def test_admin_define_carteira_pela_tela(
