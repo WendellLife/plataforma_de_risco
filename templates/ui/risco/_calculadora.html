@@ -1,0 +1,55 @@
+{% comment %}
+Calculadora HRN. Cada mudança de descritor dispara o cálculo no SERVIDOR e troca só o
+bloco de resultado — o cliente nunca calcula produto nem faixa (Espec 01, item 5).
+{% endcomment %}
+<div class="card" style="margin-top:14px;border-color:var(--ll-accent)">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <div>
+      <span class="stat__label">Estimativa {{ rotulo_tipo|lower }} · método HRN {{ method_version }}</span>
+      <div style="font:700 15px/1.3 var(--font-display);color:var(--text-strong)">{{ hazard.zone }} · {{ hazard.title }}</div>
+    </div>
+    <button class="btn btn--outline" style="margin-left:auto"
+            hx-get="{% url 'apreciacao' hazard.machine.public_uuid %}"
+            hx-target="body" hx-swap="outerHTML">Fechar</button>
+  </div>
+
+  <form style="margin-top:14px"
+        hx-post="{% url 'previa_hrn' hazard.public_uuid kind %}"
+        hx-trigger="change"
+        hx-target="#resultado-{{ hazard.public_uuid }}"
+        hx-swap="innerHTML">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+      {% for fator in fatores %}
+      <label style="display:grid;gap:5px">
+        <span style="font:700 11px/1 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">{{ fator.sigla }} · {{ fator.nome }}</span>
+        <span style="font:400 12px/1.45 var(--font-body);color:var(--text-muted)">{{ fator.pergunta }}</span>
+        <select name="{{ fator.sigla|lower }}" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:6px;font:400 13.5px/1.3 var(--font-body);background:#fff">
+          <option value="">Escolha um descritor</option>
+          {% for opcao in fator.opcoes %}
+          <option value="{{ opcao.chave }}">{{ opcao.rotulo }}{% if opcao.nota %} — {{ opcao.nota }}{% endif %} ({{ opcao.chave }})</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div id="resultado-{{ hazard.public_uuid }}" style="margin-top:16px">
+      <div class="empty__msg" style="margin:0">
+        Escolha os quatro descritores. O produto, a faixa e a comparação com a outra
+        estimativa aparecem aqui a cada escolha — nada é gravado até você confirmar.
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" type="button"
+              hx-post="{% url 'salvar_hrn' hazard.public_uuid kind %}"
+              hx-include="closest form"
+              hx-target="#resultado-{{ hazard.public_uuid }}"
+              hx-swap="innerHTML">Gravar estimativa {{ rotulo_tipo|lower }}</button>
+      <span style="font:400 12px/1.5 var(--font-body);color:var(--text-muted);align-self:center">
+        Gravar registra autor e versão do método na trilha de auditoria.
+      </span>
+    </div>
+  </form>
+</div>

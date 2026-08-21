@@ -10,4 +10,9 @@ urlpatterns = [
     path("", include("apps.core.urls")),
     path("", include("apps.ativos.urls")),
     path("", include("apps.clientes.urls")),
+    path("", include("apps.risco.urls")),
+    path("", include("apps.campo.urls")),
+    path("", include("apps.planos.urls")),
+    path("", include("apps.lotes.urls")),
+    path("", include("apps.documentos.urls")),
 ]

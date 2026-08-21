@@ -39,13 +39,25 @@ services:
         value: simple
       - key: WEB_CONCURRENCY
         value: "3"
+      # Sprint 7 — artefato publicado em bucket. Disco do Render é efêmero: sem estas
+      # variáveis o PDF de uma versão publicada se perde no próximo deploy.
+      - key: DOCUMENTS_BUCKET
+        sync: false
+      - key: DOCUMENTS_BUCKET_REGION
+        value: us-east-1
+      - key: DOCUMENTS_BUCKET_ENDPOINT
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
 
   - type: worker
     name: risco-worker
     runtime: python
     plan: starter
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "celery -A config worker -Q documentos,lotes,sincronizacao,midia -l info --concurrency 2"
+    startCommand: "celery -A config worker -Q documentos,lotes,sincronizacao,planos,midia -l info --concurrency 2"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.prod
@@ -57,3 +69,15 @@ services:
         fromDatabase: {name: risco-db, property: connectionString}
       - key: REDIS_URL
         fromService: {name: risco-redis, type: redis, property: connectionString}
+      # O worker compõe e GRAVA o PDF: precisa das mesmas credenciais de bucket que o web.
+      - key: DOCUMENTS_BUCKET
+        fromService: {name: risco-web, type: web, envVarKey: DOCUMENTS_BUCKET}
+      - key: DOCUMENTS_BUCKET_REGION
+        fromService: {name: risco-web, type: web, envVarKey: DOCUMENTS_BUCKET_REGION}
+      - key: DOCUMENTS_BUCKET_ENDPOINT
+        fromService: {name: risco-web, type: web, envVarKey: DOCUMENTS_BUCKET_ENDPOINT}
+      - key: AWS_ACCESS_KEY_ID
+        fromService: {name: risco-web, type: web, envVarKey: AWS_ACCESS_KEY_ID}
+      - key: AWS_SECRET_ACCESS_KEY
+        fromService: {name: risco-web, type: web, envVarKey: AWS_SECRET_ACCESS_KEY}
+

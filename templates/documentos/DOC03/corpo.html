@@ -1,0 +1,132 @@
+{% extends "documentos/_base.html" %}
+{% load documentos_tags %}
+
+{% comment %}
+DOC03 · Relatório de Conformidade (GR.RC.5.1 rev. 5).
+Assinado por e-CNPJ em HSM: é apuração de checklist, não peça de responsabilidade
+pessoal. O índice sai SEMPRE em dois denominadores (Espec 01, item 6).
+{% endcomment %}
+
+{% block corpo %}
+
+<h2 class="secao">{{ secoes|secao:1 }}</h2>
+<div class="grade2">
+  <div class="campo"><span class="campo__rotulo">Contratante</span><span class="campo__valor">{{ ident.cliente.razao_social }}</span></div>
+  <div class="campo"><span class="campo__rotulo">CNPJ</span><span class="campo__valor">{{ ident.cliente.cnpj }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Unidade</span><span class="campo__valor">{{ ident.unidade|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Máquina</span><span class="campo__valor">{{ ident.maquina.identificacao }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Tipo de máquina</span><span class="campo__valor">{{ ident.maquina.tipo }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Número de série</span><span class="campo__valor">{{ ident.maquina.serie|default:"não localizado" }}</span></div>
+</div>
+
+<h2 class="secao">{{ secoes|secao:2 }}</h2>
+{% if d.conformidade %}
+<p>Apuração conduzida sobre a base fixa da biblioteca {{ d.conformidade.norma }} vigente na data da coleta, com {{ d.conformidade.base_fixa }} itens. O tamanho da base é congelado no momento da aplicação: é o que torna duas máquinas comparáveis mesmo quando a biblioteca evolui entre uma coleta e outra.</p>
+<p>Anexos aplicáveis ao tipo de máquina: {% for a in ident.maquina.anexos %}{{ a }}{% if not forloop.last %}, {% endif %}{% empty %}não definidos no cadastro{% endfor %}. Itens de anexo não aplicável ao tipo não entram na apuração.</p>
+{% else %}
+<p>Não há checklist encerrado para esta máquina. O índice de conformidade só é apurado a partir de checklist encerrado — apuração parcial produz percentual enganoso.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:3 }}</h2>
+{% if d.conformidade %}
+<table>
+  <thead>
+    <tr>
+      <th>Agrupamento</th>
+      <th class="num">Conformes</th>
+      <th class="num">Parciais</th>
+      <th class="num">Não conformes</th>
+      <th class="num">Não aplicáveis</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for g in d.conformidade.grupos %}
+    <tr>
+      <td>{{ g.nome }}</td>
+      <td class="num">{{ g.conformes }}</td>
+      <td class="num">{{ g.parciais }}</td>
+      <td class="num">{{ g.nao_conformes }}</td>
+      <td class="num">{{ g.nao_aplicaveis }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Sem checklist encerrado, não há resultado por agrupamento.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:4 }}</h2>
+{% if d.conformidade.itens_nao_conformes %}
+<table>
+  <thead><tr><th style="width:20mm">Item</th><th>Requisito</th><th style="width:24mm">Resultado</th></tr></thead>
+  <tbody>
+    {% for i in d.conformidade.itens_nao_conformes %}
+    <tr>
+      <td style="font:500 8.5pt/1.3 var(--font-mono);color:var(--ll-blue-700)">{{ i.library_key }}</td>
+      <td>{{ i.enunciado }}{% if i.observacao %}<br><span style="font-size:7.5pt;color:var(--text-muted)">{{ i.observacao }}</span>{% endif %}</td>
+      <td><span class="faixa {{ i.resultado|classe_resultado }}">{{ i.resultado }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif d.conformidade %}
+<p>Nenhum item não conforme nesta apuração.</p>
+{% else %}
+<p>Sem checklist encerrado, não há itens a listar.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:5 }}</h2>
+<p>Item marcado como não aplicável não desaparece da apuração: ele consta abaixo com a justificativa registrada em campo. Excluir item da base sem justificativa altera o denominador e infla o índice — a plataforma recusa a resposta sem justificativa.</p>
+{% if d.conformidade.itens_nao_aplicaveis %}
+<table>
+  <thead><tr><th style="width:20mm">Item</th><th>Requisito</th><th>Justificativa</th></tr></thead>
+  <tbody>
+    {% for i in d.conformidade.itens_nao_aplicaveis %}
+    <tr>
+      <td style="font:500 8.5pt/1.3 var(--font-mono);color:var(--ll-blue-700)">{{ i.library_key }}</td>
+      <td>{{ i.enunciado }}</td>
+      <td>{{ i.justificativa|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif d.conformidade %}
+<p>Nenhum item excluído por inaplicabilidade nesta apuração.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:6 }}</h2>
+{% if d.conformidade %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6mm;break-inside:avoid">
+  <div style="padding:5mm 6mm;border-radius:3mm;background:var(--ll-teal-050);border:.75pt solid var(--ll-teal-100)">
+    <span class="campo__rotulo">Sobre a base fixa da biblioteca</span>
+    <span style="display:block;margin-top:2mm;font:800 26pt/1 var(--font-display);color:var(--ll-teal-700)">{{ d.conformidade.percentual_base_fixa|numero }}%</span>
+    <span style="display:block;margin-top:2mm;font:400 8.5pt/1.5 var(--font-body);color:var(--text-body)">
+      {{ d.conformidade.conformes|numero }} de {{ d.conformidade.base_fixa }} itens da base vigente.
+      É o número comparável entre máquinas.
+    </span>
+  </div>
+  <div style="padding:5mm 6mm;border-radius:3mm;background:var(--ll-slate-050);border:.75pt solid var(--ll-slate-200)">
+    <span class="campo__rotulo">Sobre os itens efetivamente avaliados</span>
+    <span style="display:block;margin-top:2mm;font:800 26pt/1 var(--font-display);color:var(--text-strong)">{{ d.conformidade.percentual_avaliados|numero }}%</span>
+    <span style="display:block;margin-top:2mm;font:400 8.5pt/1.5 var(--font-body);color:var(--text-body)">
+      {{ d.conformidade.conformes|numero }} de {{ d.conformidade.avaliados }} itens aplicáveis,
+      excluídos {{ d.conformidade.nao_aplicaveis }} item(ns) justificado(s).
+    </span>
+  </div>
+</div>
+<p class="nota nota--info">Os dois percentuais são publicados juntos por decisão de método. Divulgar apenas o segundo permite que máquinas com bases diferentes pareçam equivalentes; item parcial conta como meia conformidade.</p>
+<div class="grade2" style="margin-top:5mm">
+  <div class="campo"><span class="campo__rotulo">Checklist</span><span class="campo__valor">{{ d.conformidade.norma }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Encerrado em</span><span class="campo__valor">{{ d.conformidade.encerrado_em|date:"d/m/Y H:i"|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Itens não conformes</span><span class="campo__valor">{{ d.conformidade.nao_conformes }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Itens não aplicáveis</span><span class="campo__valor">{{ d.conformidade.nao_aplicaveis }}</span></div>
+</div>
+{% else %}
+<p class="nota nota--erro">Índice não apurado: nenhum checklist encerrado para esta máquina.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:7 }}</h2>
+<p>Este relatório apura conformidade documental e de campo em relação à base normativa citada, na data da coleta. Não substitui a análise de risco nem o laudo técnico de adequação, e não atesta segurança da máquina em condição diversa da inspecionada.</p>
+<p>Emitido pela organização mediante certificado digital de pessoa jurídica em módulo de segurança criptográfica, com carimbo do tempo. A verificação de autenticidade é feita pelo número do documento e pelo hash de conteúdo registrados no rodapé.</p>
+
+{% endblock %}

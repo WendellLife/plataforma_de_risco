@@ -1,0 +1,70 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Sincronização de campo{% endblock %}
+{% block crumbs %}<span>Sincronização de campo</span>{% endblock %}
+
+{% block conteudo %}
+{% include "ui/_shell/_sem_acesso.html" %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Coleta offline</div>
+    <h1>Sincronização de campo</h1>
+    <p>
+      O aparelho trabalha sem rede e envia lotes. Reenvio não duplica, registro inválido
+      não derruba o lote, e coleta de campo nunca sobrescreve coleta feita na web —
+      divergência entra aqui como conflito, para decisão humana.
+    </p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.lotes }}</div><span class="stat__label">Lotes recebidos</span></div>
+    <div><div class="stat__value {% if indicadores.conflitos %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.conflitos }}</div><span class="stat__label">Aguardando revisão humana</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.aparelhos_ativos }}</div><span class="stat__label">Aparelhos pareados</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.maquinas_ativas }}</div><span class="stat__label">Máquinas ativas</span></div>
+  </div>
+</div>
+
+{% if indicadores.conflitos %}
+<div class="blocker" style="margin-bottom:16px">
+  <span class="blocker__rule">SYNC</span>
+  <span>
+    <span class="blocker__title">{{ indicadores.conflitos }} lote(s) com colisão entre campo e web</span>
+    <span class="blocker__msg">
+      Conflito não é erro do aparelho e não se resolve reenviando: alguém precisa decidir
+      qual resposta vale. Abra o lote para ver item por item.
+    </span>
+  </span>
+</div>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start">
+  <div class="card">
+    <span class="stat__label" style="margin:0 0 12px">Lotes recebidos</span>
+    {% include "ui/campo/_tabela.html" %}
+  </div>
+
+  <aside class="card">
+    <span class="stat__label" style="margin:0 0 12px">Aparelhos pareados</span>
+    {% if aparelhos %}
+    <div style="display:grid;gap:10px">
+      {% for a in aparelhos %}
+      <div style="display:grid;gap:2px;padding:8px 0;border-top:1px solid var(--border-subtle)">
+        <span style="font:700 13px/1.3 var(--font-display);color:var(--text-strong)">{{ a.label }}</span>
+        <span style="font:400 12px/1.45 var(--font-body);color:var(--text-muted)">{{ a.operator }}</span>
+        <span>
+          {% if a.valido %}
+            <span class="pill pill--ok">Ativo · expira em {{ a.dias_para_expirar }} dia(s)</span>
+          {% else %}
+            <span class="pill pill--danger">{{ a.get_status_display }}</span>
+          {% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty__msg">Nenhum aparelho pareado. O pareamento é ato da sessão web e emite um token que aparece uma única vez.</div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

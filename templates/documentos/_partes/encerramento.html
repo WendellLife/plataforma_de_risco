@@ -1,0 +1,42 @@
+{% if template.trilha != 'nenhuma' %}
+<div class="assinatura">
+  <div>
+    <div style="height:16mm"></div>
+    <div class="assinatura__linha">
+      <span class="assinatura__nome">{{ ident.responsavel.nome|default:"—" }}</span>
+      <span class="assinatura__papel">
+        {{ ident.responsavel.titulo|default:"Responsável técnico" }}<br>
+        {{ ident.responsavel.registro|default:"registro profissional não informado" }}
+      </span>
+    </div>
+  </div>
+  <div>
+    <div style="height:16mm"></div>
+    <div class="assinatura__linha">
+      <span class="assinatura__nome">{{ ident.cliente.contato|default:"Representante do contratante" }}</span>
+      <span class="assinatura__papel">{{ ident.cliente.razao_social }}<br>CNPJ {{ ident.cliente.cnpj }}</span>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if url_verificacao %}
+<div class="verificacao-qr">
+  {% if qr_verificacao %}<span class="verificacao-qr__codigo">{{ qr_verificacao|safe }}</span>{% endif %}
+  <span class="verificacao-qr__texto">
+    <strong>Verificação pública.</strong>
+    Leia o código ou acesse <span class="verificacao-qr__url">{{ url_verificacao }}</span>
+    para confirmar, sem login, que este documento foi emitido por esta plataforma e que o
+    conteúdo permanece o mesmo desde a publicação. A página confirma a emissão — o conteúdo
+    técnico continua sendo do contratante.
+  </span>
+</div>
+{% endif %}
+
+<div class="rodape-tecnico">
+  <strong>Rastreabilidade.</strong>
+  Documento {{ documento.number }}{% if documento.current_version %}, versão {{ documento.current_version.number }}, publicado em {{ documento.current_version.published_at|date:"d/m/Y H:i" }} por {{ documento.current_version.published_by }}. Hash SHA-256 do conteúdo: {{ documento.current_version.content_hash }}{% else %}, minuta não publicada — sem hash de conteúdo e sem assinatura digital{% endif %}.
+  Template {{ template.chave_legada }} revisão {{ template.revisao }}; método de estimativa HRN versão {{ method_versions.hrn }}.
+  Trilha de assinatura prevista: {{ template.rotulo_trilha }}.
+  Duas estimativas de risco só são comparáveis quando calculadas pela mesma versão do método.
+</div>

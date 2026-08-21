@@ -66,6 +66,7 @@ class User(AbstractUser):
     tenant = models.ForeignKey(
         Tenant, null=True, blank=True, on_delete=models.PROTECT, related_name="users"
     )
+    # Aparece em URL na tela de acesso: id de banco não sai da aplicação (Espec 07).
     public_uuid = models.UUIDField(default=uuid_lib.uuid4, unique=True, editable=False)
     role = models.CharField(max_length=20, choices=UserRole.choices, default=UserRole.ANALYST)
     person = models.ForeignKey(
@@ -93,10 +94,72 @@ class User(AbstractUser):
         return self.role in PERFIS_QUE_PUBLICAM
 
     @property
+    def ve_toda_a_organizacao(self) -> bool:
+        from .enums import PERFIS_SEM_RESTRICAO_DE_CARTEIRA
+
+        return self.is_superuser or self.role in PERFIS_SEM_RESTRICAO_DE_CARTEIRA
+
+    @property
+    def somente_leitura(self) -> bool:
+        from .enums import PERFIS_SOMENTE_LEITURA
+
+        return self.role in PERFIS_SOMENTE_LEITURA
+
+    def carteira(self) -> frozenset[int] | None:
+        """Ids de cliente visíveis. None = toda a organização.
+
+        Cuidado ao mexer: devolver None por engano dá acesso total; devolver frozenset()
+        para um administrador o cega. Os dois casos têm teste.
+        """
+        if self.ve_toda_a_organizacao:
+            return None
+        return frozenset(
+            ClientAssignment.objects.filter(user=self).values_list("client_id", flat=True)
+        )
+
+    @property
     def exige_mfa(self) -> bool:
         from .enums import PERFIS_QUE_EXIGEM_MFA
 
         return self.role in PERFIS_QUE_EXIGEM_MFA
+
+
+class ClientAssignment(models.Model):
+    """Vínculo usuário → cliente: a carteira de quem não vê a organização inteira.
+
+    Por que uma tabela e não um campo no usuário: um técnico atende vários clientes, e a
+    atribuição precisa de rastro — quem atribuiu e quando. Tirar um cliente da carteira de
+    alguém é decisão de acesso, e decisão de acesso não pode ser silenciosa.
+
+    Ausência de linhas para um usuário de perfil com carteira significa **nenhum acesso**,
+    não acesso total. É o padrão seguro: um usuário recém-criado não vê nada até alguém
+    dizer o que ele deve ver.
+    """
+
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="+")
+    user = models.ForeignKey("core.User", on_delete=models.CASCADE, related_name="assignments")
+    client = models.ForeignKey(
+        "clientes.Client", on_delete=models.CASCADE, related_name="assigned_users"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        "core.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = SemEscopoManager()  # resolvido pelo middleware, antes de existir escopo
+
+    class Meta:
+        verbose_name = "atribuição de cliente"
+        verbose_name_plural = "atribuições de cliente"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "client"], name="core_clientassignment_unica"
+            )
+        ]
+        indexes = [models.Index(fields=["tenant", "user"])]
+
+    def __str__(self) -> str:
+        return f"{self.user} → {self.client}"
 
 
 class AuditLog(models.Model):

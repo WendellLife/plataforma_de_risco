@@ -1,0 +1,81 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Documentos{% endblock %}
+
+{% block conteudo %}
+{% include "ui/_shell/_sem_acesso.html" %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Saídas</div>
+    <h1>Documentos</h1>
+    <p>Emissão verificada. Nenhum documento sai da plataforma com incoerência de cadastro.</p>
+  </div>
+</div>
+
+{% if messages %}{% for m in messages %}
+<div class="blocker" style="margin-bottom:16px;{% if m.tags == 'success' %}background:var(--ll-success-bg);border-color:var(--ll-success){% endif %}">
+  <span class="blocker__rule">{{ m.tags|default:"info" }}</span>
+  <span class="blocker__msg">{{ m }}</span>
+  <span></span>
+</div>
+{% endfor %}{% endif %}
+
+<div class="cards" style="margin-bottom:20px">
+  <div class="card"><span class="stat__value">{{ indicadores.publicados }}</span><span class="stat__label">Publicados</span></div>
+  <div class="card"><span class="stat__value {% if indicadores.bloqueados %}stat__value--alert{% endif %}">{{ indicadores.bloqueados }}</span><span class="stat__label">Bloqueados</span></div>
+  <div class="card"><span class="stat__value">{{ indicadores.rascunhos }}</span><span class="stat__label">Rascunhos</span></div>
+  <div class="card"><span class="stat__value">{{ indicadores.conversao }}%</span><span class="stat__label">Emissão concluída</span></div>
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <form class="toolbar" style="margin:0" method="post" action="{% url 'emitir_documento' %}">
+    {% csrf_token %}
+    <select class="field" name="maquina" required style="min-width:280px">
+      <option value="">Selecione a máquina</option>
+      {% for m in maquinas %}<option value="{{ m.public_uuid }}">{{ m.name }} · {{ m.client.legal_name }}</option>{% endfor %}
+    </select>
+    <select class="field" name="template" required style="min-width:260px">
+      {% for t in templates %}<option value="{{ t.codigo }}">{{ t.codigo }} — {{ t.nome }} (rev. {{ t.revisao }})</option>{% endfor %}
+    </select>
+    <button class="btn btn--primary" type="submit">Preparar emissão</button>
+    <span style="font:400 12.5px/1.4 var(--font-body);color:var(--text-muted)">
+      A emissão abre em minuta; a publicação só é liberada quando o verificador não tem bloqueio.
+    </span>
+  </form>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Documento</th><th>Máquina</th><th>Cliente</th>
+        <th>Situação</th><th>Versão</th><th>Verificador</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for doc in documentos %}
+      <tr>
+        <td><span class="mono">{{ doc.number }}</span><br>{{ doc.template_code }} · {{ doc.title }}</td>
+        <td>{{ doc.machine.name }}</td>
+        <td>{{ doc.machine.client.legal_name }}</td>
+        <td>
+          {% if doc.status == 'published' %}<span class="pill pill--ok">Publicado</span>
+          {% elif doc.status == 'blocked' %}<span class="pill pill--danger">Bloqueado</span>
+          {% elif doc.status == 'ready' %}<span class="pill pill--warn">Pronto</span>
+          {% else %}<span class="pill pill--muted">{{ doc.get_status_display }}</span>{% endif %}
+        </td>
+        <td>{% if doc.current_version %}v{{ doc.current_version.number }}{% else %}—{% endif %}</td>
+        <td>{% if doc.n_bloqueios %}<span class="pill pill--danger">{{ doc.n_bloqueios }} bloqueio(s)</span>{% else %}<span class="pill pill--ok">sem bloqueio</span>{% endif %}</td>
+        <td><a href="{% url 'documento' doc.public_uuid %}">abrir</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">
+        <div class="empty">
+          <div class="empty__title">Nenhum documento emitido</div>
+          <div class="empty__msg">Selecione uma máquina e um template acima para preparar a primeira emissão.</div>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

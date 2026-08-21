@@ -1,0 +1,101 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>{{ documento.number }} · {{ template.nome }}</title>
+<style>{% include "documentos/_estilo.css" %}</style>
+</head>
+<body>
+
+{% if not modo_impressao %}
+<div class="barra-previa">
+  <strong>Prévia de impressão</strong>
+  <span>{{ documento.number }} · {{ template.nome }} · {{ template.chave_legada }} rev. {{ template.revisao }}</span>
+  <span style="margin-left:auto">
+    <a href="{% url 'documento' documento.public_uuid %}">voltar à emissão</a>
+    &nbsp;·&nbsp;
+    <a href="{% url 'pdf_documento' documento.public_uuid %}">baixar PDF</a>
+  </span>
+</div>
+{% endif %}
+
+{% if not documento.current_version %}<div class="marca-agua">MINUTA</div>{% endif %}
+
+<section class="capa">
+  <div class="capa__marcas">
+    <img class="capa__logo" src="{% if modo_impressao %}static/ds/logos/logo-horizontal-branca.png{% else %}{% static 'ds/logos/logo-horizontal-branca.png' %}{% endif %}" alt="{{ marca.emissor }}">
+    {% if marca.co_marca and marca.tem_logo %}
+    {% comment %}
+    Logo do contratante ao LADO do emissor, nunca no lugar dele: quem responde
+    tecnicamente pela peça precisa estar identificado sem ambiguidade.
+    {% endcomment %}
+    <span class="capa__marcas-sep"></span>
+    <span class="capa__contratante">
+      <span class="capa__contratante-rotulo">Contratante</span>
+      <span class="capa__contratante-nome">{{ marca.nome }}</span>
+    </span>
+    {% endif %}
+  </div>
+  <div class="capa__eyebrow">Documento técnico · {{ template.chave_legada }} · revisão {{ template.revisao }}</div>
+  <h1 class="capa__titulo">{{ template.nome }}</h1>
+  <p class="capa__sub">
+    {{ ident.maquina.identificacao }}{% if ident.maquina.fabricante %} · {{ ident.maquina.fabricante }} {{ ident.maquina.modelo }}{% endif %}{% if ident.maquina.serie %} · nº de série {{ ident.maquina.serie }}{% endif %}<br>
+    {{ ident.cliente.razao_social }}{% if ident.unidade %} · {{ ident.unidade }}{% endif %}
+  </p>
+
+  {% if documento.current_version %}
+  <span class="selo selo--publicado">Publicado · versão {{ documento.current_version.number }}</span>
+  {% else %}
+  <span class="selo selo--minuta">Minuta{% if bloqueios %} · {{ bloqueios|length }} bloqueio(s) de publicação{% endif %}</span>
+  {% endif %}
+
+  <div class="capa__meta">
+    <div class="capa__campo">
+      <span class="capa__rotulo">Documento</span>
+      <span class="capa__valor capa__numero">{{ documento.number }}</span>
+    </div>
+    <div class="capa__campo">
+      <span class="capa__rotulo">Emitido em</span>
+      <span class="capa__valor">{{ d.documento.emitido_em|date:"d/m/Y H:i" }}</span>
+    </div>
+    <div class="capa__campo">
+      <span class="capa__rotulo">Contratante</span>
+      <span class="capa__valor">{{ ident.cliente.razao_social }}</span>
+    </div>
+    <div class="capa__campo">
+      <span class="capa__rotulo">Projeto · ART</span>
+      <span class="capa__valor">{{ ident.projeto.numero|default:"—" }} · {{ ident.projeto.art|default:"ART não registrada" }}</span>
+    </div>
+    <div class="capa__campo">
+      <span class="capa__rotulo">Responsável técnico</span>
+      <span class="capa__valor">{{ ident.responsavel.nome|default:"não vinculado" }}{% if ident.responsavel.registro %} · {{ ident.responsavel.registro }}{% endif %}</span>
+    </div>
+    <div class="capa__campo">
+      <span class="capa__rotulo">Assinatura</span>
+      <span class="capa__valor">{{ template.rotulo_trilha }}</span>
+    </div>
+  </div>
+</section>
+
+<div class="folha">
+
+{% if bloqueios or avisos %}
+{% include "documentos/_partes/verificacao.html" %}
+{% endif %}
+
+<h2 class="secao" style="margin-top:0">Sumário</h2>
+<div>
+  {% for s in secoes %}
+  <div class="campo" style="display:flex;justify-content:space-between;gap:6mm">
+    <span style="font:600 10pt/1.4 var(--font-body);color:var(--text-strong)">{{ s.numero }}. {{ s.titulo }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+{% block corpo %}{% endblock %}
+
+{% include "documentos/_partes/encerramento.html" %}
+
+</div>
+</body>
+</html>

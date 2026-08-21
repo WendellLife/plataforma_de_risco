@@ -1,0 +1,142 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Acesso e visibilidade{% endblock %}
+{% block crumbs %}<span>Acesso e visibilidade</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Conta</div>
+    <h1>Acesso e visibilidade</h1>
+    <p>
+      O administrador vê toda a organização. Os demais perfis veem apenas os clientes
+      atribuídos a eles — e quem não recebeu nenhum cliente não vê dado algum. É o padrão
+      seguro: acesso é concedido, nunca presumido.
+    </p>
+  </div>
+  <a class="btn" href="{% url 'novo_usuario' %}">Novo usuário</a>
+</div>
+
+{% if sem_carteira %}
+<div class="blocker" style="margin-bottom:16px;border-color:var(--ll-warning);background:var(--ll-warning-bg)">
+  <span class="blocker__rule" style="background:#fff;color:var(--ll-warning)">ACESSO</span>
+  <span>
+    <span class="blocker__title">{{ sem_carteira|length }} usuário(s) sem nenhum cliente atribuído</span>
+    <span class="blocker__msg">
+      Eles entram no sistema e encontram todas as telas vazias, sem entender por quê.
+      Atribua clientes abaixo ou desative as contas que não devem ter acesso.
+    </span>
+  </span>
+</div>
+{% endif %}
+
+<div style="display:grid;gap:12px">
+  {% for l in linhas %}
+  <div class="card" {% if not l.ativo %}style="opacity:.62"{% elif l.sem_carteira %}style="border-color:var(--ll-warning)"{% endif %}>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <div style="min-width:240px">
+        <div style="font:700 15px/1.35 var(--font-display);color:var(--text-strong)">
+          {{ l.usuario.get_full_name|default:l.usuario.username }}
+          {% if l.e_voce %}<span style="font:400 12px/1 var(--font-body);color:var(--text-muted)">(você)</span>{% endif %}
+        </div>
+        <div style="margin-top:2px;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">{{ l.usuario.email }}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center">
+        <span class="pill">{{ l.usuario.get_role_display }}</span>
+        {% if not l.ativo %}<span class="pill">desativado</span>{% endif %}
+        {% if l.convite_pendente %}<span class="pill">convite pendente</span>{% endif %}
+        {% if l.publica %}<span class="pill pill--ok">publica documento assinado</span>{% endif %}
+        {% if l.somente_leitura %}<span class="pill">somente leitura</span>{% endif %}
+        {% if l.usuario.mfa_enabled %}<span class="pill">MFA</span>{% endif %}
+      </div>
+    </div>
+
+    {% if not l.ativo %}
+    <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <form method="post" action="{% url 'salvar_situacao' l.usuario.public_uuid %}">
+        {% csrf_token %}<input type="hidden" name="ativo" value="1">
+        <button class="btn btn--outline" type="submit">Reativar conta</button>
+      </form>
+      <span style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+        Não entra e não aparece em nenhuma tela. A conta e a trilha de auditoria ficam —
+        reativar não devolve carteira: o acesso é reconcedido à mão.
+      </span>
+    </div>
+    {% else %}
+
+    {% if l.toda_a_organizacao %}
+    <div style="margin-top:12px;padding:11px 14px;border-radius:8px;background:var(--surface-sunken)">
+      <span style="font:600 13px/1.4 var(--font-display);color:var(--text-strong)">Vê toda a organização</span>
+      <span style="display:block;margin-top:2px;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+        Perfil administrador não tem carteira: atribuir clientes aqui sugeriria uma
+        restrição que não existiria de fato.
+      </span>
+    </div>
+    {% else %}
+    <form method="post" action="{% url 'salvar_carteira' l.usuario.public_uuid %}" style="margin-top:12px">
+      {% csrf_token %}
+      <span class="stat__label" style="margin:0 0 8px">Clientes que este usuário vê</span>
+      {% if clientes %}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px">
+        {% for c in clientes %}
+        <label style="display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:7px;cursor:pointer;background:var(--surface-card)">
+          <input type="checkbox" name="clientes" value="{{ c.pk }}"
+                 {% if c in l.clientes %}checked{% endif %}
+                 style="width:16px;height:16px;accent-color:var(--color-primary)">
+          <span style="font:400 13px/1.35 var(--font-body);color:var(--text-body)">{{ c.legal_name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn" type="submit">Salvar acesso</button>
+        <span style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+          {% if l.sem_carteira %}Hoje sem nenhum cliente — não vê dado algum.{% else %}Vê {{ l.clientes|length }} cliente(s).{% endif %}
+          Toda alteração fica na trilha de auditoria.
+        </span>
+      </div>
+      {% else %}
+      <div class="empty__msg">Nenhum cliente cadastrado nesta organização ainda.</div>
+      {% endif %}
+    </form>
+    {% endif %}
+
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+      <form method="post" action="{% url 'salvar_perfil' l.usuario.public_uuid %}" style="display:flex;gap:8px;align-items:flex-end">
+        {% csrf_token %}
+        <label style="display:grid;gap:5px">
+          <span class="stat__label" style="margin:0">Perfil</span>
+          <select class="field" name="role">
+            {% for p in perfis %}
+            <option value="{{ p.valor }}" {% if p.valor == l.usuario.role %}selected{% endif %}>{{ p.nome }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="btn btn--outline" type="submit">Alterar perfil</button>
+      </form>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap">
+        {% if l.convite_pendente %}
+        <form method="post" action="{% url 'reenviar_convite' l.usuario.public_uuid %}">
+          {% csrf_token %}
+          <button class="btn btn--outline" type="submit">Reenviar convite</button>
+        </form>
+        {% endif %}
+        {% if not l.e_voce %}
+        <form method="post" action="{% url 'salvar_situacao' l.usuario.public_uuid %}">
+          {% csrf_token %}<input type="hidden" name="ativo" value="0">
+          <button class="btn btn--outline" type="submit">Desativar</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if l.usuario.role == 'admin' %}
+    <div style="margin-top:8px;font:400 12px/1.5 var(--font-body);color:var(--text-muted)">
+      Promover a administrador apaga a carteira existente: acesso não deve ressuscitar
+      sozinho num rebaixamento futuro.
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

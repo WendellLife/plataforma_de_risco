@@ -1,0 +1,143 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Plano de ação · {{ maquina.name }}{% endblock %}
+{% block crumbs %}<a href="{% url 'maquinas' %}">Máquinas</a><span>›</span><a href="{% url 'ficha_maquina' maquina.public_uuid %}">{{ maquina.name }}</a><span>›</span><span>Plano de ação</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ maquina.client.legal_name }}</div>
+    <h1>Plano de ação</h1>
+    <p>
+      Toda recomendação e todo item não conforme entra aqui como ação com responsável
+      nominal e prazo. Ação só encerra com evidência anexada — e a adequação é recalculada
+      pela data do fato, não pela data do lançamento.
+    </p>
+  </div>
+  {% if not shell.somente_leitura %}
+  <form method="post" action="{% url 'gerar_acoes' maquina.public_uuid %}">
+    {% csrf_token %}
+    <button class="btn" type="submit">Gerar ações dos achados</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:26px">{{ adequacao.percentual }}%</div><span class="stat__label">Adequação desta máquina</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ adequacao.concluidas }}/{{ adequacao.total }}</div><span class="stat__label">Ações concluídas</span></div>
+    <div><div class="stat__value {% if indicadores.vencidas %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.vencidas }}</div><span class="stat__label">Vencidas</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.a_vencer }}</div><span class="stat__label">A vencer em 15 dias</span></div>
+    <div><div class="stat__value {% if indicadores.sem_evidencia %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.sem_evidencia }}</div><span class="stat__label">Sem evidência</span></div>
+    <div><div class="stat__value {% if indicadores.bloqueantes_abertas %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.bloqueantes_abertas }}</div><span class="stat__label">Bloqueiam publicação</span></div>
+  </div>
+</div>
+
+{% if indicadores.bloqueantes_abertas %}
+<div class="blocker" style="margin-bottom:16px">
+  <span class="blocker__rule">PLANO</span>
+  <span>
+    <span class="blocker__title">{{ indicadores.bloqueantes_abertas }} ação(ões) bloqueante(s) em aberto</span>
+    <span class="blocker__msg">
+      Ação marcada como bloqueante retém a PRÓXIMA emissão de documento desta máquina até
+      ser encerrada com evidência. Encerre ou justifique o cancelamento.
+    </span>
+  </span>
+</div>
+{% endif %}
+
+{% if linhas %}
+<div style="display:grid;gap:12px">
+  {% for l in linhas %}
+  <div class="card" id="acao-{{ l.acao.public_uuid }}" {% if l.exige_atencao %}style="border-color:var(--ll-danger)"{% endif %}>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <span class="mono" style="font-size:12px;color:var(--ll-blue-700)">{{ l.acao.code }}</span>
+      <div style="flex:1;min-width:280px">
+        <div style="font:700 15px/1.35 var(--font-display);color:var(--text-strong)">{{ l.acao.text }}</div>
+        <div style="margin-top:3px;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+          {{ l.origem }} · responsável {{ l.acao.owner.name }}
+          {% if l.acao.suggested_days %} · prazo sugerido pelo risco: {{ l.acao.suggested_days }} dia(s){% endif %}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        {% if l.acao.blocking %}<span class="pill pill--danger">Bloqueante</span>{% endif %}
+        <span class="pill {% if l.situacao == 'concluida' %}pill--ok{% elif l.exige_atencao %}pill--danger{% endif %}">{{ l.rotulo }}</span>
+        <span class="mono" style="font-size:12px;color:var(--text-muted)">{{ l.acao.deadline|date:"d/m/Y" }}</span>
+      </div>
+    </div>
+
+    {% if l.mensagem %}
+    <div class="blocker" style="margin-top:12px">
+      <span class="blocker__rule">PRAZO</span>
+      <span><span class="blocker__title">{{ l.mensagem }}</span></span>
+    </div>
+    {% endif %}
+
+    {% if l.repactuacoes %}
+    <div style="margin-top:10px;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+      Prazo repactuado {{ l.repactuacoes }} vez(es) — o histórico fica na trilha de auditoria.
+    </div>
+    {% endif %}
+
+    {% if l.evidencias %}
+    <div style="margin-top:12px">
+      <span class="stat__label" style="margin:0 0 6px">Evidências</span>
+      <div style="display:grid;gap:6px">
+        {% for e in l.evidencias %}
+        <div style="display:flex;gap:10px;align-items:baseline;font:400 12.5px/1.5 var(--font-body);color:var(--text-body)">
+          <span class="pill">{{ e.get_kind_display }}</span>
+          <span>{{ e.caption|default:e.file_key }}</span>
+          {% if e.occurred_on %}<span class="mono" style="margin-left:auto;font-size:11.5px;color:var(--text-muted)">fato em {{ e.occurred_on|date:"d/m/Y" }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% elif l.situacao != 'cancelada' and l.situacao != 'concluida' %}
+    <div class="blocker" style="margin-top:12px;border-color:var(--ll-warning);background:var(--ll-warning-bg)">
+      <span class="blocker__rule" style="background:#fff;color:var(--ll-warning)">PROVA</span>
+      <span>
+        <span class="blocker__title">Nenhuma evidência anexada</span>
+        <span class="blocker__msg">Esta ação não poderá ser encerrada até que exista foto, nota fiscal, certificado ou laudo.</span>
+      </span>
+    </div>
+    {% endif %}
+
+    {% if l.situacao != 'concluida' and l.situacao != 'cancelada' and not shell.somente_leitura %}
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <form method="post" action="{% url 'evidenciar_acao' l.acao.public_uuid %}" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        {% csrf_token %}
+        <input name="file_key" placeholder="chave do arquivo no armazenamento" required
+               style="padding:7px 9px;border:1px solid var(--border-strong);border-radius:6px;font:400 12.5px/1.3 var(--font-body);min-width:230px">
+        <select name="kind" style="padding:7px 9px;border:1px solid var(--border-strong);border-radius:6px;font:400 12.5px/1.3 var(--font-body)">
+          <option value="photo">Foto</option>
+          <option value="invoice">Nota fiscal</option>
+          <option value="certificate">Certificado</option>
+          <option value="report">Laudo</option>
+        </select>
+        <button class="btn btn--outline" type="submit">Anexar evidência</button>
+      </form>
+      {% if l.situacao != 'aberta' or l.evidencias %}
+      <form method="post" action="{% url 'concluir_acao' l.acao.public_uuid %}">
+        {% csrf_token %}
+        <button class="btn" type="submit" {% if l.sem_evidencia %}disabled title="Anexe evidência antes de encerrar"{% endif %}>Encerrar com evidência</button>
+      </form>
+      {% else %}
+      <form method="post" action="{% url 'iniciar_acao' l.acao.public_uuid %}">
+        {% csrf_token %}
+        <button class="btn btn--outline" type="submit">Marcar em execução</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty__msg">
+    Nenhuma ação no plano. Use <strong>Gerar ações dos achados</strong> para converter as
+    medidas propostas e os itens não conformes em ações com responsável e prazo — o prazo
+    inicial é sugerido pela faixa de HRN da zona.
+  </div>
+</div>
+{% endif %}
+{% endblock %}

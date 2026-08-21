@@ -1,3 +1,49 @@
-from .calculo import METHOD_VERSION, Band, Fatores, Resultado, estimar, faixa_de
+from .calculo import (
+    FAIXAS,
+    METHOD_VERSION,
+    ROTULOS,
+    Band,
+    Fatores,
+    Resultado,
+    estimar,
+    faixa_de,
+)
+from .escalas import (
+    DPH,
+    FATORES,
+    FE,
+    LO,
+    NP,
+    Fator,
+    Opcao,
+    descritor,
+    escala_visual,
+    indice_da_faixa,
+    opcoes,
+)
+from .reducao import TOLERAVEIS, Comparacao, comparar
 
-__all__ = ("METHOD_VERSION", "Band", "Fatores", "Resultado", "estimar", "faixa_de")
+__all__ = (
+    "DPH",
+    "FAIXAS",
+    "FATORES",
+    "FE",
+    "LO",
+    "METHOD_VERSION",
+    "NP",
+    "ROTULOS",
+    "TOLERAVEIS",
+    "Band",
+    "Comparacao",
+    "Fator",
+    "Fatores",
+    "Opcao",
+    "Resultado",
+    "comparar",
+    "descritor",
+    "escala_visual",
+    "estimar",
+    "faixa_de",
+    "indice_da_faixa",
+    "opcoes",
+)

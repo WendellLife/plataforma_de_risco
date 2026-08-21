@@ -1,0 +1,146 @@
+{% extends "documentos/_base.html" %}
+{% load documentos_tags %}
+
+{% comment %}DOC02 · Relatório de Segurança (GR.RS.4.2 rev. 2).{% endcomment %}
+
+{% block corpo %}
+
+<h2 class="secao">{{ secoes|secao:1 }}</h2>
+<div class="grade2">
+  <div class="campo"><span class="campo__rotulo">Contratante</span><span class="campo__valor">{{ ident.cliente.razao_social }}</span></div>
+  <div class="campo"><span class="campo__rotulo">CNPJ</span><span class="campo__valor">{{ ident.cliente.cnpj }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Unidade</span><span class="campo__valor">{{ ident.unidade|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Máquina</span><span class="campo__valor">{{ ident.maquina.identificacao }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Fabricante · modelo</span><span class="campo__valor">{{ ident.maquina.fabricante|default:"—" }} {{ ident.maquina.modelo }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Número de série</span><span class="campo__valor">{{ ident.maquina.serie|default:"não localizado" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Responsável técnico</span><span class="campo__valor">{{ ident.responsavel.nome|default:"não vinculado" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Registro · ART</span><span class="campo__valor">{{ ident.responsavel.registro|default:"—" }} · {{ ident.projeto.art|default:"não registrada" }}</span></div>
+</div>
+
+<h2 class="secao">{{ secoes|secao:2 }}</h2>
+<p>Este relatório registra a inspeção de segurança realizada na máquina {{ ident.maquina.identificacao }}, com foco no estado dos dispositivos de proteção instalados, no isolamento de energias perigosas e nas não conformidades observadas em campo. Complementa a análise de risco e antecede o laudo técnico de adequação.</p>
+<p>A inspeção verifica o que existe e como está funcionando. A proposição de medidas obedece à ordem de prioridade da ABNT NBR ISO 12100 e às exigências dos anexos aplicáveis da NR-12{% if ident.maquina.anexos %} ({% for a in ident.maquina.anexos %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}){% endif %}.</p>
+
+<h2 class="secao">{{ secoes|secao:3 }}</h2>
+<h3 class="sub">3.1 Isolamento de energias</h3>
+<table>
+  <thead><tr><th>Fonte de energia</th><th class="num">Magnitude</th><th>Ponto de bloqueio</th><th>Situação</th></tr></thead>
+  <tbody>
+    {% for f in d.fontes %}
+    <tr>
+      <td>{{ f.tipo }}</td>
+      <td class="num">{{ f.magnitude|numero }} {{ f.unidade }}</td>
+      <td>{{ f.ponto|default:"—" }}{% if f.local %}<br><span style="font-size:7.5pt;color:var(--text-muted)">{{ f.local }}</span>{% endif %}</td>
+      <td>{% if f.bloqueavel %}<span class="faixa faixa--ok">bloqueável</span>{% else %}<span class="faixa faixa--alto">sem ponto de bloqueio</span>{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Nenhuma fonte de energia cadastrada — inspeção de isolamento não realizável.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if d.fontes_sem_bloqueio %}
+<p class="nota nota--erro">A máquina não está apta a intervenção com bloqueio: {{ d.fontes_sem_bloqueio|length }} fonte(s) sem ponto de bloqueio identificado.</p>
+{% else %}
+<p class="nota nota--info">Todas as fontes de energia têm ponto de bloqueio identificado — a máquina admite elaboração de procedimento LOTO.</p>
+{% endif %}
+
+<h3 class="sub">3.2 Limites e condições de operação</h3>
+{% if d.limites %}
+<div class="grade2">
+  {% for l in d.limites %}
+  <div class="campo"><span class="campo__rotulo">{{ l.nome }}</span><span class="campo__valor">{{ l.valor }}</span></div>
+  {% endfor %}
+</div>
+{% else %}
+<p>Limites de operação não registrados no cadastro da máquina.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:4 }}</h2>
+<table>
+  <thead><tr><th>Dispositivo</th><th>Fabricante · modelo</th><th>Certificado</th><th>Validade</th></tr></thead>
+  <tbody>
+    {% for c in d.componentes %}
+    <tr>
+      <td>{{ c.dispositivo }}</td>
+      <td>{{ c.fabricante|default:"—" }}{% if c.modelo %} · {{ c.modelo }}{% endif %}</td>
+      <td>{{ c.certificado|default:"sem número" }}</td>
+      <td>{% if c.validade %}{{ c.validade|date:"d/m/Y" }}{% if c.vencido %} <span class="faixa faixa--alto">vencido</span>{% endif %}{% else %}—{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Nenhum dispositivo de segurança cadastrado nesta máquina.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if d.certificados_vencidos %}
+<p class="nota nota--alerta">{{ d.certificados_vencidos|length }} dispositivo(s) com certificado vencido. O relatório declara o vencimento; a substituição ou recertificação entra no plano de ação.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:5 }}</h2>
+{% if d.riscos %}
+<table>
+  <thead><tr><th>Zona</th><th>Constatação</th><th>Tipo</th><th class="num">HRN</th><th>Faixa</th></tr></thead>
+  <tbody>
+    {% for r in d.riscos %}
+    <tr>
+      <td>{{ r.zona }}</td>
+      <td>{{ r.titulo }}{% if r.medidas_existentes %}<br><span style="font-size:7.5pt;color:var(--text-muted)">existente: {{ r.medidas_existentes }}</span>{% endif %}</td>
+      <td>{{ r.tipo }}</td>
+      <td class="num">{{ r.hrn_inicial|numero }}</td>
+      <td><span class="faixa {{ r.faixa_inicial|classe_faixa }}">{{ r.rotulo_inicial }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if consolidacao %}
+<p style="margin-top:4mm">{{ consolidacao.intoleraveis_antes }} de {{ consolidacao.total }} constatação(ões) em faixa intolerável no estado encontrado.</p>
+{% endif %}
+{% else %}
+<p>Nenhuma não conformidade registrada nesta inspeção.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:6 }}</h2>
+{% if d.riscos %}
+{% for r in d.riscos %}{% if r.medidas %}
+<div class="risco">
+  <div class="risco__cabecalho">
+    <span class="risco__zona">{{ r.zona }}</span>
+    <span class="risco__tipo">
+      HRN {{ r.hrn_inicial|numero }} → {% if r.hrn_residual %}{{ r.hrn_residual|numero }}{% else %}não reestimado{% endif %}
+    </span>
+  </div>
+  <table>
+    <thead><tr><th>Etapa ISO 12100</th><th>Medida recomendada</th><th>Dispositivo</th><th class="num">Prazo</th></tr></thead>
+    <tbody>
+      {% for m in r.medidas %}
+      <tr>
+        <td>{{ m.etapa }}</td>
+        <td>{{ m.texto }}</td>
+        <td>{{ m.dispositivo|default:"—" }}</td>
+        <td class="num">{% if m.prazo %}{{ m.prazo }} d{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if not r.faixa_residual %}
+  <p class="nota nota--erro">Sem reestimativa de HRN, esta recomendação não demonstra redução de risco (regra D-03).</p>
+  {% endif %}
+</div>
+{% endif %}{% endfor %}
+{% else %}
+<p>Sem constatações, não há medidas a recomendar.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:7 }}</h2>
+{% if consolidacao %}
+<p>A inspeção identificou {{ consolidacao.total }} constatação(ões) de segurança, das quais {{ consolidacao.intoleraveis_antes }} em faixa intolerável. Com as medidas recomendadas implantadas, permanecem {{ consolidacao.intoleraveis_depois }} em faixa intolerável.</p>
+{% endif %}
+{% if d.fontes_sem_bloqueio or consolidacao.sem_residual %}
+<p>A máquina <strong>não está apta</strong> a receber laudo de adequação nesta condição: {% if d.fontes_sem_bloqueio %}há fonte de energia sem ponto de bloqueio{% endif %}{% if d.fontes_sem_bloqueio and consolidacao.sem_residual %} e {% endif %}{% if consolidacao.sem_residual %}há medida proposta sem risco residual reestimado{% endif %}.</p>
+{% else %}
+<p>Sanadas as não conformidades listadas nesta inspeção, a máquina reúne as condições cadastrais para emissão do laudo técnico de adequação.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:8 }}</h2>
+<p>A inspeção de segurança e as recomendações deste relatório foram conduzidas sob responsabilidade técnica do profissional identificado abaixo.</p>
+
+{% endblock %}

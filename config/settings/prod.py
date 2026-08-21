@@ -36,3 +36,16 @@ X_FRAME_OPTIONS = "DENY"
 
 DATABASES["default"]["CONN_MAX_AGE"] = 600  # noqa: F405
 DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}  # noqa: F405
+
+# Sprint 7 — em produção o artefato publicado vive em bucket, não em disco de contêiner.
+# Disco de contêiner no Render é efêmero: sem bucket, o PDF de uma versão publicada
+# desaparece no próximo deploy e a prova se perde.
+if not DOCUMENTS_BUCKET:  # noqa: F405
+    import warnings
+
+    warnings.warn(
+        "DOCUMENTS_BUCKET não configurado: os PDFs publicados vão para disco efêmero e "
+        "serão perdidos no próximo deploy. Configure o bucket antes de emitir em produção.",
+        RuntimeWarning,
+        stacklevel=1,
+    )

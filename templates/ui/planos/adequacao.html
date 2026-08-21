@@ -1,0 +1,73 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Adequação · {{ cliente.legal_name }}{% endblock %}
+{% block crumbs %}<a href="{% url 'clientes' %}">Clientes</a><span>›</span><span>{{ cliente.legal_name }}</span><span>›</span><span>Adequação</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ cliente.legal_name }}</div>
+    <h1>Painel de adequação</h1>
+    <p>
+      Quanto do que foi apontado já foi resolvido. O denominador é toda ação do escopo,
+      inclusive as canceladas — cancelar não some do histórico. Só ação encerrada com
+      evidência soma, e conta na data do fato.
+    </p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:30px">{{ indicadores.adequacao.percentual }}%</div><span class="stat__label">Adequação atual</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.adequacao.concluidas }}/{{ indicadores.adequacao.total }}</div><span class="stat__label">Ações concluídas</span></div>
+    <div><div class="stat__value {% if indicadores.vencidas %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.vencidas }}</div><span class="stat__label">Vencidas</span></div>
+    <div><div class="stat__value {% if indicadores.sem_evidencia %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.sem_evidencia }}</div><span class="stat__label">Sem evidência</span></div>
+    <div><div class="stat__value {% if indicadores.repactuadas %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.repactuadas }}</div><span class="stat__label">Com prazo repactuado</span></div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start">
+  <div class="card">
+    <span class="stat__label" style="margin:0 0 14px">Evolução pela data do fato</span>
+    {% if curva %}
+    <div style="display:grid;gap:9px">
+      {% for p in curva %}
+      <div style="display:grid;grid-template-columns:88px 1fr 84px;gap:12px;align-items:center">
+        <span class="mono" style="font-size:11.5px;color:var(--text-muted)">{{ p.ate|date:"m/Y" }}</span>
+        <span style="height:12px;border-radius:999px;background:var(--surface-sunken);display:block;position:relative;overflow:hidden">
+          <span style="position:absolute;inset:0 auto 0 0;width:{{ p.percentual }}%;background:var(--color-primary);border-radius:999px"></span>
+        </span>
+        <span class="mono" style="font-size:12px;color:var(--text-body);text-align:right">{{ p.percentual }}% · {{ p.concluidas }}/{{ p.total }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p style="margin:14px 0 0;font:400 12.5px/1.55 var(--font-body);color:var(--text-muted);max-width:70ch">
+      A curva é reconstruída pela data em que a proteção foi executada, não pela data do
+      lançamento no sistema. Registrar hoje uma adequação feita em julho move o ponto de
+      julho — é isso que a torna auditável.
+    </p>
+    {% else %}
+    <div class="empty__msg">Sem ações registradas para este cliente.</div>
+    {% endif %}
+  </div>
+
+  <aside class="card">
+    <span class="stat__label" style="margin:0 0 12px">Carga por responsável</span>
+    {% if responsaveis %}
+    <div style="display:grid;gap:10px">
+      {% for r in responsaveis %}
+      <div style="padding:8px 0;border-top:1px solid var(--border-subtle)">
+        <div style="font:700 13px/1.3 var(--font-display);color:var(--text-strong)">{{ r.nome }}</div>
+        <div style="margin-top:3px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="pill">{{ r.total }} ação(ões)</span>
+          {% if r.vencidas %}<span class="pill pill--danger">{{ r.vencidas }} vencida(s)</span>{% endif %}
+          {% if r.concluidas %}<span class="pill pill--ok">{{ r.concluidas }} concluída(s)</span>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty__msg">Nenhuma ação atribuída.</div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="{% static 'ds/logos/favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<title>{% if c.encontrado %}Documento {{ c.numero }} · verificação{% else %}Documento não encontrado{% endif %}</title>
+<style>
+  :root{--tinta:#12212b;--corpo:#3b4b56;--fraco:#6b7a85;--linha:#e3e8eb;--ok:#1c6f4a;--okbg:#eef7f2;--erro:#9a2e2a;--errobg:#fdf1f0;--fundo:#f5f7f8}
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 20px 56px;background:var(--fundo);font:400 15px/1.6 'Manrope',ui-sans-serif,system-ui,sans-serif;color:var(--corpo)}
+  main{max-width:620px;margin:0 auto}
+  .marca{height:26px;margin-bottom:22px}
+  .cartao{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:26px 24px;box-shadow:0 1px 2px rgba(18,33,43,.05)}
+  .selo{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;font:700 13px/1 'Manrope',ui-sans-serif,system-ui,sans-serif}
+  .selo--ok{background:var(--okbg);color:var(--ok)}
+  .selo--erro{background:var(--errobg);color:var(--erro)}
+  h1{margin:16px 0 4px;font:800 25px/1.2 'Manrope',ui-sans-serif,system-ui,sans-serif;color:var(--tinta);letter-spacing:-.02em}
+  .sub{margin:0 0 22px;font-size:14.5px;color:var(--fraco)}
+  dl{display:grid;grid-template-columns:1fr;gap:0;margin:0}
+  .par{display:grid;grid-template-columns:150px 1fr;gap:14px;padding:11px 0;border-top:1px solid var(--linha)}
+  dt{font:700 12px/1.5 'Manrope',ui-sans-serif,system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--fraco)}
+  dd{margin:0;color:var(--tinta)}
+  .mono{font:500 13px/1.5 'IBM Plex Mono',ui-monospace,Menlo,monospace;word-break:break-all}
+  .nota{margin:22px 0 0;padding:14px 16px;border-radius:10px;background:var(--fundo);font-size:13.5px;color:var(--fraco)}
+  a{color:var(--ok)}
+  a:hover{color:var(--tinta)}
+  @media (max-width:520px){.par{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<main>
+  {% comment %}
+  Identidade da PLATAFORMA, nunca do cliente — mesmo em contrato white-label. Esta página
+  existe para um terceiro confirmar autenticidade; parecer material do contratante
+  enfraqueceria exatamente o que ela prova. A regra é imposta em motores/marca.
+  {% endcomment %}
+  <img class="marca" src="{% static 'ds/logos/logo-horizontal.png' %}" alt="Life Laboral">
+
+  {% if c.encontrado %}
+  <div class="cartao">
+    <span class="selo selo--ok">Documento autêntico</span>
+    <h1>{{ c.template_nome }}</h1>
+    <p class="sub">{{ c.numero }} · versão {{ c.versao }}{% if c.substituida %} · <strong>versão substituída</strong>{% endif %}</p>
+
+    <dl>
+      <div class="par"><dt>Emitido em</dt><dd>{{ c.publicado_em|date:"d/m/Y \à\s H:i" }}</dd></div>
+      <div class="par"><dt>Contratante</dt><dd>{{ c.contratante }}</dd></div>
+      <div class="par"><dt>Equipamento</dt><dd>{{ c.maquina }}</dd></div>
+      <div class="par"><dt>Responsável técnico</dt><dd>{{ c.responsavel|default:"não vinculado" }}{% if c.registro %}<br><span style="color:var(--fraco)">{{ c.registro }}</span>{% endif %}</dd></div>
+      <div class="par"><dt>Modelo</dt><dd>{{ c.revisao }}</dd></div>
+      <div class="par"><dt>Assinatura</dt><dd>{{ c.assinatura }}</dd></div>
+      <div class="par"><dt>Hash SHA-256</dt><dd class="mono">{{ c.content_hash }}</dd></div>
+    </dl>
+
+    {% if c.substituida %}
+    <p class="nota" style="background:var(--errobg);color:var(--erro)">
+      Esta é uma versão anterior do documento. Existe revisão mais recente — peça ao
+      contratante a versão vigente antes de usar este exemplar como referência.
+    </p>
+    {% endif %}
+
+    <p class="nota">
+      Esta página confirma que o documento foi emitido pela plataforma e que o conteúdo
+      permanece o mesmo desde a publicação. Ela não expõe o conteúdo técnico: o laudo, a
+      apreciação de risco e os dados do parque são do contratante, e é com ele que devem
+      ser solicitados.
+    </p>
+  </div>
+  {% else %}
+  <div class="cartao">
+    <span class="selo selo--erro">Documento não encontrado</span>
+    <h1>Não há registro deste código</h1>
+    <p class="sub">Nenhum documento publicado corresponde ao identificador consultado.</p>
+    <p class="nota">
+      Três explicações possíveis: o código foi digitado com erro, o exemplar em mãos é uma
+      minuta — que não tem verificação pública porque não foi emitida —, ou o documento não
+      saiu desta plataforma. Confira o código impresso junto ao QR e tente novamente.
+    </p>
+  </div>
+  {% endif %}
+</main>
+</body>
+</html>

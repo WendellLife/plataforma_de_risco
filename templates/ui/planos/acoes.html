@@ -1,0 +1,76 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Plano de ação{% endblock %}
+{% block crumbs %}<span>Plano de ação</span>{% endblock %}
+
+{% block conteudo %}
+{% include "ui/_shell/_sem_acesso.html" %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Ciclo</div>
+    <h1>Plano de ação</h1>
+    <p>
+      Todas as ações do parque, vencidas primeiro. A situação de prazo é calculada na hora
+      da leitura — não existe estado "atrasada" gravado que possa ficar velho entre
+      execuções de rotina.
+    </p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.total }}</div><span class="stat__label">Ações no parque</span></div>
+    <div><div class="stat__value {% if indicadores.vencidas %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.vencidas }}</div><span class="stat__label">Vencidas</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.a_vencer }}</div><span class="stat__label">A vencer em 15 dias</span></div>
+    <div><div class="stat__value {% if indicadores.sem_evidencia %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.sem_evidencia }}</div><span class="stat__label">Sem evidência</span></div>
+    <div><div class="stat__value {% if indicadores.bloqueantes_abertas %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.bloqueantes_abertas }}</div><span class="stat__label">Retêm publicação</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.adequacao.percentual }}%</div><span class="stat__label">Adequação do parque</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+    <span class="stat__label" style="margin:0">Ações</span>
+    <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+      <a class="pill {% if not situacao %}pill--ok{% endif %}" href="{% url 'acoes' %}">Todas</a>
+      <a class="pill {% if situacao == 'vencida' %}pill--danger{% endif %}" href="?situacao=vencida">Vencidas</a>
+      <a class="pill {% if situacao == 'a_vencer' %}pill--ok{% endif %}" href="?situacao=a_vencer">A vencer</a>
+      <a class="pill {% if situacao == 'concluida' %}pill--ok{% endif %}" href="?situacao=concluida">Concluídas</a>
+    </div>
+  </div>
+
+  {% if linhas %}
+  <table class="table">
+    <thead><tr><th>Ação</th><th>Máquina</th><th>Responsável</th><th>Prazo</th><th>Situação</th><th>Prova</th></tr></thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr>
+        <td>
+          <a href="{% url 'plano_maquina' l.acao.plan.machine.public_uuid %}#acao-{{ l.acao.public_uuid }}" class="mono" style="font-size:12px">{{ l.acao.code }}</a>
+          <div style="margin-top:2px;font:400 12.5px/1.45 var(--font-body);color:var(--text-body);max-width:52ch">{{ l.acao.text|truncatechars:110 }}</div>
+          {% if l.acao.blocking %}<span class="pill pill--danger" style="margin-top:4px">Retém publicação</span>{% endif %}
+        </td>
+        <td style="font:400 12.5px/1.4 var(--font-body)">{{ l.acao.plan.machine.name }}</td>
+        <td style="font:400 12.5px/1.4 var(--font-body)">{{ l.acao.owner.name }}</td>
+        <td class="mono" style="font-size:12px">{{ l.acao.deadline|date:"d/m/Y" }}</td>
+        <td>
+          <span class="pill {% if l.situacao == 'concluida' %}pill--ok{% elif l.exige_atencao %}pill--danger{% endif %}">{{ l.rotulo }}</span>
+          {% if l.repactuacoes %}<span class="pill" style="margin-left:4px">{{ l.repactuacoes }}× repactuada</span>{% endif %}
+        </td>
+        <td>
+          {% if l.evidencias %}<span class="pill pill--ok">{{ l.evidencias|length }}</span>
+          {% elif l.situacao == 'cancelada' %}<span style="color:var(--text-muted)">—</span>
+          {% else %}<span class="pill pill--danger">sem</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty__msg">
+    Nenhuma ação {% if situacao %}nesta situação{% else %}registrada{% endif %}. As ações
+    nascem dos achados: abra a ficha de uma máquina e gere o plano a partir das medidas
+    propostas e dos itens não conformes.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

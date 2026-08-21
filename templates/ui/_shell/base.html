@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block titulo %}Plataforma de Risco{% endblock %} · Life Laboral</title>
+<title>{% block titulo %}Plataforma de Risco{% endblock %} · {{ marca.nome }}</title>
+<meta name="theme-color" content="{{ marca.primaria }}">
+<link rel="icon" href="{% static 'ds/logos/favicon.svg' %}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{% static 'ds/logos/icone-192.png' %}">
 <link rel="stylesheet" href="{% static 'ds/tokens/fonts.css' %}">
 <link rel="stylesheet" href="{% static 'ds/tokens/colors.css' %}">
 <link rel="stylesheet" href="{% static 'ds/tokens/typography.css' %}">
@@ -11,6 +14,13 @@
 <link rel="stylesheet" href="{% static 'ds/tokens/effects.css' %}">
 <link rel="stylesheet" href="{% static 'ds/tokens/base.css' %}">
 <link rel="stylesheet" href="{% static 'ds/app.css' %}">
+{% if marca_css %}
+{% comment %}
+Cor do cliente aplicada só quando a carteira tem exatamente um cliente — ver
+apps/core/context_marca.py. A cor de texto vem decidida pelo motor, por contraste real.
+{% endcomment %}
+<style>:root{ {{ marca_css }} }</style>
+{% endif %}
 <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
 </head>
 <body>
@@ -18,7 +28,23 @@
   {% include "ui/_shell/sidebar.html" %}
   <div class="main">
     {% include "ui/_shell/topbar.html" %}
-    <main class="content">{% block conteudo %}{% endblock %}</main>
+    <main class="content">
+      {% if messages %}
+      {% comment %}
+      Retorno de ação fica na tela até a próxima navegação — alteração de acesso é
+      decisão, e decisão não se confirma com aviso que desaparece sozinho.
+      {% endcomment %}
+      <div class="avisos" role="status" aria-live="polite">
+        {% for m in messages %}
+        <div class="aviso {% if 'error' in m.tags %}aviso--erro{% elif 'success' in m.tags %}aviso--ok{% endif %}">
+          <span class="aviso__marca">{% if 'error' in m.tags %}Rever{% elif 'success' in m.tags %}Feito{% else %}Aviso{% endif %}</span>
+          <span>{{ m }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block conteudo %}{% endblock %}
+    </main>
   </div>
 </div>
 </body>

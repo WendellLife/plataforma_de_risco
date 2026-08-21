@@ -1,0 +1,25 @@
+{% if lotes %}
+<table class="table">
+  <thead><tr><th>Lote</th><th>Aparelho</th><th>Situação</th><th>Aplicados</th><th>Falhas</th><th>Conflitos</th><th>Recebido</th></tr></thead>
+  <tbody>
+    {% for l in lotes %}
+    <tr>
+      <td><a href="{% url 'lote_campo' l.public_uuid %}" class="mono">{{ l.client_batch_uuid|slice:":8" }}…</a></td>
+      <td>{{ l.device.label }}</td>
+      <td>
+        {% if l.status == 'applied' %}<span class="pill pill--ok">Aplicado</span>
+        {% elif l.status == 'partial' %}<span class="pill">Parcial</span>
+        {% elif l.status == 'rejected' %}<span class="pill pill--danger">Recusado</span>
+        {% else %}<span class="pill">Vazio</span>{% endif %}
+      </td>
+      <td class="mono">{{ l.applied_count }}</td>
+      <td class="mono">{{ l.failed_count }}</td>
+      <td class="mono">{% if l.conflict_count %}<span class="pill pill--danger">{{ l.conflict_count }}</span>{% else %}0{% endif %}</td>
+      <td>{{ l.received_at|date:"d/m/Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty__msg">Nenhum lote recebido ainda. O aparelho envia ao recuperar rede.</div>
+{% endif %}

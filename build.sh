@@ -6,6 +6,12 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 python manage.py collectstatic --noinput
+
+# As migrações são geradas no build enquanto o esquema está em construção.
+# ANTES DO PRIMEIRO CLIENTE REAL, congele: rode makemigrations localmente, versione os
+# arquivos em apps/*/migrations e remova esta linha. Gerar migração no build significa que
+# o esquema pode divergir entre ambientes e que não há histórico revisável de alterações.
+python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
 # Popula a biblioteca NR-12 e os dados de demonstração no primeiro deploy.
