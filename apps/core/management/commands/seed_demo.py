@@ -240,7 +240,7 @@ class Command(BaseCommand):
         """
         from datetime import timedelta
 
-        from apps.planos.models import Action
+        from apps.planos.models import Action, Evidence
         from apps.planos.services import (
             abrir_plano,
             anexar_evidencia,
@@ -268,12 +268,19 @@ class Command(BaseCommand):
 
         # 1ª ação: executada de fato há 40 dias, com nota fiscal. Move a curva no passado.
         concluida = criadas[0]
+        chave_evidencia = f"planos/{tenant.pk}/nf-protecao-fixa.pdf"
+        evidencia_existente = Evidence.objects.filter(
+            tenant=tenant, file_key=chave_evidencia
+        ).select_related("action").first()
+        if evidencia_existente is not None:
+            concluida = evidencia_existente.action
         if concluida.status != "done":
-            anexar_evidencia(
-                action=concluida, file_key=f"planos/{tenant.pk}/nf-protecao-fixa.pdf",
-                kind="invoice", caption="Nota fiscal da proteção fixa com interbloqueio",
-                occurred_on=hoje - timedelta(days=40), actor=engenheiro,
-            )
+            if evidencia_existente is None:
+                anexar_evidencia(
+                    action=concluida, file_key=chave_evidencia,
+                    kind="invoice", caption="Nota fiscal da proteção fixa com interbloqueio",
+                    occurred_on=hoje - timedelta(days=40), actor=engenheiro,
+                )
             concluir_acao(action=concluida, actor=engenheiro)
 
         # 2ª ação: vencida há 12 dias e sem evidência — o alerta que o gestor precisa ver.
