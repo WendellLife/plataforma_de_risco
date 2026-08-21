@@ -1,0 +1,68 @@
+{% comment %}
+Plano do lote. Mostrado ANTES de enfileirar — é o passo que evita esperar meia hora por
+um lote que ia falhar. Recusa nomeia a regra: "não entrou" sem motivo é inútil.
+{% endcomment %}
+<div style="border:1px solid var(--border-subtle);border-radius:10px;padding:16px;background:var(--ll-slate-050)">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+    <div>
+      <span class="stat__label">Prontas para emitir</span>
+      <div class="stat__value" style="font-size:28px">{{ plano.prontas|length }}</div>
+    </div>
+    <div>
+      <span class="stat__label">Recusadas</span>
+      <div class="stat__value {% if plano.recusadas %}stat__value--alert{% endif %}" style="font-size:28px">{{ plano.recusadas|length }}</div>
+    </div>
+    <div>
+      <span class="stat__label">Tempo estimado</span>
+      <div class="stat__value" style="font-size:22px">~{{ plano.minutos_estimados }} min</div>
+    </div>
+    {% if plano.excedente %}
+    <div>
+      <span class="stat__label">Acima do limite</span>
+      <div class="stat__value stat__value--alert" style="font-size:22px">{{ plano.excedente }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if plano.excedente %}
+  <div class="blocker" style="margin-top:14px">
+    <span class="blocker__rule">LIMITE</span>
+    <span>
+      <span class="blocker__title">{{ plano.excedente }} máquina(s) ficaram fora deste lote</span>
+      <span class="blocker__msg">O teto é {{ limite }} por lote, para que a estimativa de tempo continue honesta. Rode um segundo lote depois deste.</span>
+    </span>
+  </div>
+  {% endif %}
+
+  {% if recusas %}
+  <div style="margin-top:14px">
+    <span class="stat__label" style="margin:0 0 8px">Não entram — e por quê</span>
+    <div style="display:grid;gap:6px;max-height:280px;overflow:auto">
+      {% for r in recusas %}
+      <div style="font:400 12.5px/1.5 var(--font-body);color:var(--text-body);padding:6px 0;border-top:1px solid var(--border-subtle)">{{ r }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if plano.vazio %}
+  <div class="blocker" style="margin-top:14px">
+    <span class="blocker__rule">LOTE</span>
+    <span>
+      <span class="blocker__title">Nenhuma máquina elegível</span>
+      <span class="blocker__msg">Corrija os bloqueios listados acima e planeje de novo. Enfileirar nada só produziria espera.</span>
+    </span>
+  </div>
+  {% else %}
+  <form method="post" action="{% url 'confirmar_lote' %}" style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    {% csrf_token %}
+    <input type="hidden" name="template_code" value="{{ template_code }}">
+    {% if cliente %}<input type="hidden" name="client" value="{{ cliente.public_uuid }}">{% endif %}
+    <button class="btn" type="submit">Emitir {{ plano.prontas|length }} documento(s)</button>
+    <span style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+      Cada documento é publicado como ato próprio, com sua versão e seu hash. Uma falha
+      não desfaz as demais.
+    </span>
+  </form>
+  {% endif %}
+</div>

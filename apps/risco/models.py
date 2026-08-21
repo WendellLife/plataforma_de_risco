@@ -17,6 +17,8 @@ from .enums import (
 
 
 class Hazard(RegistroTenant):
+    caminho_para_cliente = "machine__client_id"
+
     machine = models.ForeignKey("ativos.Machine", on_delete=models.CASCADE, related_name="hazards")
     zone = models.CharField("zona de perigo", max_length=120)
     title = models.CharField(max_length=200)
@@ -54,6 +56,8 @@ class Hazard(RegistroTenant):
 class HrnEstimate(RegistroTenant):
     """Estimativa de risco. Inicial e residual são REGISTROS, não campos (Espec 02)."""
 
+    caminho_para_cliente = "hazard__machine__client_id"
+
     hazard = models.ForeignKey(Hazard, on_delete=models.CASCADE, related_name="estimates")
     kind = models.CharField(max_length=10, choices=EstimateKind.choices)
     lo = models.DecimalField("probabilidade (LO)", max_digits=5, decimal_places=3)
@@ -83,6 +87,8 @@ class HrnEstimate(RegistroTenant):
 class SafetyCategory(RegistroTenant):
     """Categoria de segurança e PLr da função de proteção — por ZONA, não por máquina."""
 
+    caminho_para_cliente = "hazard__machine__client_id"
+
     hazard = models.OneToOneField(Hazard, on_delete=models.CASCADE, related_name="safety_category")
     s = models.PositiveSmallIntegerField("gravidade (S)")
     f = models.PositiveSmallIntegerField("frequência (F)")
@@ -100,6 +106,8 @@ class SafetyCategory(RegistroTenant):
 
 
 class Recommendation(RegistroTenant):
+    caminho_para_cliente = "hazard__machine__client_id"
+
     hazard = models.ForeignKey(Hazard, on_delete=models.CASCADE, related_name="recommendations")
     kind = models.CharField(max_length=12, choices=RecommendationKind.choices, default=RecommendationKind.NORMATIVE)
     standard_reference = models.ForeignKey(

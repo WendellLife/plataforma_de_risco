@@ -7,6 +7,7 @@
     <span style="font:700 9.5px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">Organização</span>
     <span style="font:700 13.5px/1.3 var(--font-display);color:var(--text-strong)">{{ shell.tenant.legal_name }}</span>
     <span style="font:400 11.5px/1.4 var(--font-body);color:var(--text-muted)">{{ shell.perfil }}</span>
+    <span style="margin-top:4px;font:600 10px/1.3 var(--font-display);letter-spacing:.06em;text-transform:uppercase;color:{% if shell.sem_carteira %}var(--ll-warning){% else %}var(--ll-teal-700){% endif %}">{{ shell.escopo }}</span>
   </div>
   {% endif %}
 
@@ -15,12 +16,21 @@
     <a class="navitem" href="{% url 'painel' %}" {% if request.resolver_match.url_name == 'painel' %}aria-current="page"{% endif %}>Painel de adequação</a>
     <a class="navitem" href="{% url 'maquinas' %}" {% if request.resolver_match.url_name == 'maquinas' %}aria-current="page"{% endif %}>Máquinas</a>
     <a class="navitem" href="{% url 'clientes' %}" {% if request.resolver_match.url_name == 'clientes' %}aria-current="page"{% endif %}>Clientes</a>
+    <a class="navitem" href="{% url 'campo' %}" {% if request.resolver_match.url_name == 'campo' or request.resolver_match.url_name == 'lote_campo' %}aria-current="page"{% endif %}>Sincronização de campo</a>
 
     <span class="sidebar__group">Saídas</span>
-    <a class="navitem" href="#" aria-disabled="true" style="opacity:.45;cursor:not-allowed" title="Sprint 5">Documentos</a>
-    <a class="navitem" href="#" aria-disabled="true" style="opacity:.45;cursor:not-allowed" title="Sprint 8">Plano de ação</a>
+    <a class="navitem" href="{% url 'documentos' %}" {% if request.resolver_match.url_name == 'documentos' or request.resolver_match.url_name == 'documento' %}aria-current="page"{% endif %}>Documentos</a>
+    {% if not shell.somente_leitura %}
+    <a class="navitem" href="{% url 'lotes' %}" {% if request.resolver_match.url_name == 'lotes' or request.resolver_match.url_name == 'lote' %}aria-current="page"{% endif %}>Emissão em lote</a>
+    {% endif %}
+
+    <span class="sidebar__group">Ciclo</span>
+    <a class="navitem" href="{% url 'acoes' %}" {% if request.resolver_match.url_name == 'acoes' or request.resolver_match.url_name == 'plano_maquina' %}aria-current="page"{% endif %}>Plano de ação</a>
 
     <span class="sidebar__group">Conta</span>
+    {% if shell.administra %}
+    <a class="navitem" href="{% url 'usuarios' %}" {% if request.resolver_match.url_name == 'usuarios' or request.resolver_match.url_name == 'novo_usuario' %}aria-current="page"{% endif %}>Acesso e visibilidade</a>
+    {% endif %}
     <a class="navitem" href="/admin/">Administração</a>
   </nav>
 </aside>

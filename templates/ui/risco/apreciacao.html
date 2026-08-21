@@ -1,0 +1,129 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Apreciação de risco · {{ maquina.name }}{% endblock %}
+{% block crumbs %}<a href="{% url 'maquinas' %}">Máquinas</a><span>›</span><a href="{% url 'ficha_maquina' maquina.public_uuid %}">{{ maquina.name }}</a><span>›</span><span>Apreciação de risco</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ maquina.client.legal_name }}{% if maquina.org_unit %} · {{ maquina.org_unit.caminho }}{% endif %}</div>
+    <h1>Apreciação de risco</h1>
+    <p>
+      Método HRN versão <span class="mono">{{ method_version }}</span> — LO × FE × DPH × NP.
+      O produto e a faixa são calculados pelo servidor a cada escolha; gravar é ato separado.
+    </p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:22px">{{ apreciacao.total }}</div><span class="stat__label">Zonas de perigo</span></div>
+    <div><div class="stat__value {% if apreciacao.sem_estimativa %}stat__value--alert{% endif %}" style="font-size:22px">{{ apreciacao.sem_estimativa }}</div><span class="stat__label">Sem estimativa inicial</span></div>
+    <div><div class="stat__value {% if apreciacao.pendencias_d03 %}stat__value--alert{% endif %}" style="font-size:22px">{{ apreciacao.pendencias_d03 }}</div><span class="stat__label">Medida sem residual · D-03</span></div>
+    <div><div class="stat__value {% if apreciacao.intoleraveis_depois %}stat__value--alert{% endif %}" style="font-size:22px">{{ apreciacao.intoleraveis_antes }} → {{ apreciacao.intoleraveis_depois }}</div><span class="stat__label">Fora de faixa tolerável</span></div>
+    {% if apreciacao.reducao_media is not None %}
+    <div><div class="stat__value" style="font-size:22px">{{ apreciacao.reducao_media }}%</div><span class="stat__label">Redução média do HRN</span></div>
+    {% endif %}
+  </div>
+</div>
+
+{% if apreciacao.pendencias_d03 %}
+<div class="blocker" style="margin-bottom:16px">
+  <span class="blocker__rule">D-03</span>
+  <span>
+    <span class="blocker__title">{{ apreciacao.pendencias_d03 }} zona(s) com medida proposta e sem risco residual</span>
+    <span class="blocker__msg">
+      Recomendação sem residual bloqueia a publicação da análise de risco. Estime o residual
+      em cada zona marcada abaixo — o cálculo já está aberto na linha.
+    </span>
+  </span>
+</div>
+{% endif %}
+
+{% if apreciacao.linhas %}
+<div style="display:grid;gap:12px">
+  {% for linha in apreciacao.linhas %}
+  <div class="card" id="perigo-{{ linha.hazard.public_uuid }}">
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <div>
+        <span class="stat__label">{{ linha.hazard.zone }} · {{ linha.hazard.get_iso12100_type_display }} · {{ linha.hazard.get_lifecycle_phase_display }}</span>
+        <div style="font:700 16px/1.3 var(--font-display);color:var(--text-strong)">{{ linha.hazard.title }}</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        {% if linha.inicial %}<span class="pill">Inicial · HRN {{ linha.inicial.product|floatformat:"-3" }} · {{ linha.inicial.get_band_display }}</span>{% endif %}
+        {% if linha.residual %}
+          <span class="pill {% if linha.comparacao.residual_tolerabel %}pill--ok{% else %}pill--danger{% endif %}">Residual · HRN {{ linha.residual.product|floatformat:"-3" }} · {{ linha.residual.get_band_display }}</span>
+        {% endif %}
+        {% if linha.comparacao %}
+          <span class="mono" style="color:var(--text-muted);font-size:12px">
+            {% if linha.comparacao.melhorou %}−{{ linha.comparacao.reducao_percentual }}% · {{ linha.comparacao.degraus }} faixa(s){% elif linha.comparacao.piorou %}residual acima do inicial{% else %}mesma faixa{% endif %}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if linha.metodo_divergente %}
+    <div class="blocker" style="margin-top:12px">
+      <span class="blocker__rule">HRN</span>
+      <span>
+        <span class="blocker__title">Estimativas de versões diferentes do método</span>
+        <span class="blocker__msg">Recalcule as duas na versão {{ method_version }} para que a comparação volte a valer.</span>
+      </span>
+    </div>
+    {% endif %}
+
+    {% if linha.pendencia_d03 %}
+    <div class="blocker" style="margin-top:12px">
+      <span class="blocker__rule">D-03</span>
+      <span>
+        <span class="blocker__title">{{ linha.medidas|length }} medida(s) proposta(s) sem risco residual estimado</span>
+        <span class="blocker__msg">Sem residual não há como demonstrar que a medida reduziu o risco.</span>
+      </span>
+      <button class="btn btn--outline" style="background:#fff"
+              hx-get="{% url 'calculadora_hrn' linha.hazard.public_uuid 'residual' %}"
+              hx-target="#calc-{{ linha.hazard.public_uuid }}" hx-swap="innerHTML">Estimar residual</button>
+    </div>
+    {% endif %}
+
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn btn--outline"
+              hx-get="{% url 'calculadora_hrn' linha.hazard.public_uuid 'initial' %}"
+              hx-target="#calc-{{ linha.hazard.public_uuid }}" hx-swap="innerHTML">
+        {% if linha.inicial %}Revisar inicial{% else %}Estimar inicial{% endif %}
+      </button>
+      <button class="btn btn--outline"
+              hx-get="{% url 'calculadora_hrn' linha.hazard.public_uuid 'residual' %}"
+              hx-target="#calc-{{ linha.hazard.public_uuid }}" hx-swap="innerHTML">
+        {% if linha.residual %}Revisar residual{% else %}Estimar residual{% endif %}
+      </button>
+    </div>
+
+    {% if linha.fatores_inicial or linha.fatores_residual %}
+    <table class="table" style="margin-top:12px">
+      <thead><tr><th>Fator</th><th>Inicial</th><th>Residual</th></tr></thead>
+      <tbody>
+        {% for f in linha.fatores_inicial %}
+        <tr>
+          <td><strong>{{ f.sigla }}</strong></td>
+          <td>{{ f.descritor }} <span class="mono" style="color:var(--text-muted)">{{ f.valor }}</span></td>
+          <td>
+            {% for r in linha.fatores_residual %}{% if r.sigla == f.sigla %}{{ r.descritor }} <span class="mono" style="color:var(--text-muted)">{{ r.valor }}</span>{% endif %}{% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    <div id="calc-{{ linha.hazard.public_uuid }}"></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty__msg">
+    Nenhuma zona de perigo cadastrada para esta máquina. Sem perigo identificado não há
+    apreciação — e a análise de risco não pode ser publicada (regra D-01 do template DOC-01).
+  </div>
+</div>
+{% endif %}
+{% endblock %}

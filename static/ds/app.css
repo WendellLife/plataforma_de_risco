@@ -12,7 +12,7 @@ body {
 }
 
 a { color: var(--text-link); text-decoration: none; }
-a:hover { color: var(--color-primary); }
+a:hover { color: var(--brand-primary, var(--color-primary)); }
 
 /* ---- esqueleto ---- */
 .shell { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
@@ -39,7 +39,10 @@ a:hover { color: var(--color-primary); }
   transition: background 130ms, color 130ms;
 }
 .navitem:hover { background: var(--surface-sunken); color: var(--text-strong); }
-.navitem[aria-current="page"] { background: var(--color-primary); color: #fff; }
+.navitem[aria-current="page"] {
+  background: var(--brand-primary, var(--color-primary));
+  color: var(--brand-on-primary, #fff);
+}
 .navitem__count {
   margin-left: auto; font: 700 11px/1 var(--font-display);
   padding: 3px 7px; border-radius: 999px; background: var(--surface-sunken);
@@ -61,7 +64,7 @@ a:hover { color: var(--color-primary); }
 .pagehead { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 22px; }
 .eyebrow {
   font: 700 11px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase;
-  color: var(--color-primary); margin-bottom: 8px;
+  color: var(--brand-primary, var(--color-primary)); margin-bottom: 8px;
 }
 .pagehead h1 { margin: 0; font: 800 30px/1.15 var(--font-display); letter-spacing: -.02em; color: var(--text-strong); }
 .pagehead p { margin: 6px 0 0; font: 400 14px/1.5 var(--font-body); color: var(--text-muted); }
@@ -73,10 +76,32 @@ a:hover { color: var(--color-primary); }
   border: 0; border-radius: 999px; cursor: pointer;
   font: 700 13.5px/1 var(--font-body); transition: transform 130ms, box-shadow 210ms, background 130ms;
 }
-.btn--primary { background: var(--gradient-brand); color: #fff; box-shadow: var(--shadow-sm); }
-.btn--primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); color: #fff; }
-.btn--outline { background: transparent; color: var(--text-strong); box-shadow: inset 0 0 0 1.5px var(--border-strong); }
-.btn--outline:hover { box-shadow: inset 0 0 0 1.5px var(--color-primary); color: var(--color-primary); }
+/* .btn sozinho é o botão primário: os templates usam class="btn" o tempo todo, e um
+   seletor sem fundo produzia botão invisível. --brand-* vem da marca do cliente quando
+   há uma; a cor do texto é decidida por contraste real em motores/marca. */
+.btn,
+.btn--primary {
+  background: var(--brand-primary, var(--color-primary));
+  color: var(--brand-on-primary, var(--text-on-brand, #fff));
+  box-shadow: var(--shadow-sm);
+}
+.btn:hover,
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: saturate(1.08) brightness(.96);
+}
+.btn--outline {
+  background: transparent;
+  color: var(--text-strong);
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
+}
+.btn--outline:hover {
+  background: transparent;
+  filter: none;
+  box-shadow: inset 0 0 0 1.5px var(--brand-primary, var(--color-primary));
+  color: var(--brand-primary, var(--color-primary));
+}
 .btn:active { transform: translateY(0); box-shadow: var(--shadow-xs); }
 .btn:disabled { opacity: .5; transform: none; cursor: not-allowed; }
 
@@ -100,11 +125,30 @@ a:hover { color: var(--color-primary); }
   background: var(--ll-danger-bg); border: 1px solid var(--ll-danger-border, var(--ll-danger));
 }
 .blocker__rule {
-  font: 700 12px/1 ui-monospace, Menlo, monospace; color: var(--ll-danger);
+  font: 700 12px/1 var(--font-mono); color: var(--ll-danger);
   padding: 5px 9px; border-radius: 8px; background: rgba(255,255,255,.6);
 }
 .blocker__title { font: 700 14px/1.4 var(--font-body); color: var(--text-strong); }
 .blocker__msg { font: 400 13px/1.5 var(--font-body); color: var(--text-body); }
+
+/* ---- retorno de ação (mesma família do bloqueio, nunca toast) ----
+   Toast desaparece antes de ser lido e não volta. Confirmação de alteração de acesso
+   precisa ficar na tela até a próxima navegação. */
+.avisos { display: grid; gap: 8px; margin-bottom: 18px; }
+.aviso {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center;
+  padding: 12px 16px; border-radius: 12px;
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  font: 400 13.5px/1.5 var(--font-body); color: var(--text-body);
+}
+.aviso__marca {
+  font: 700 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 9px; border-radius: 8px; background: rgba(255,255,255,.7); color: var(--text-muted);
+}
+.aviso--ok { background: var(--ll-success-bg); border-color: var(--ll-success); }
+.aviso--ok .aviso__marca { color: var(--ll-success); }
+.aviso--erro { background: var(--ll-danger-bg); border-color: var(--ll-danger); }
+.aviso--erro .aviso__marca { color: var(--ll-danger); }
 
 /* ---- tabela densa ---- */
 .table { width: 100%; border-collapse: collapse; }
@@ -119,11 +163,14 @@ a:hover { color: var(--color-primary); }
   border-bottom: 1px solid var(--border-subtle);
 }
 .table tbody tr:hover { background: var(--surface-sunken); }
-.mono { font: 600 12.5px/1.4 ui-monospace, Menlo, monospace; color: var(--ll-blue-700); }
+.mono { font: 600 12.5px/1.4 var(--font-mono); color: var(--ll-blue-700); }
 
+/* Mesmo defeito que .btn tinha: seletor sem fundo próprio deixava a etiqueta invisível
+   (texto do corpo sobre o cartão, sem pill nenhuma). O estado neutro é o padrão. */
 .pill {
   display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px;
   font: 700 11px/1.2 var(--font-body); white-space: nowrap;
+  background: var(--surface-sunken); color: var(--text-muted);
 }
 .pill--ok { background: var(--ll-success-bg); color: var(--ll-success); }
 .pill--warn { background: var(--ll-warning-bg); color: var(--ll-warning); }
@@ -137,8 +184,8 @@ a:hover { color: var(--color-primary); }
   font: 400 13.5px/1 var(--font-body); color: var(--text-body);
 }
 .field:focus {
-  outline: none; border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary) 55%, transparent);
+  outline: none; border-color: var(--brand-primary, var(--color-primary));
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--brand-primary, var(--color-primary)) 55%, transparent);
 }
 .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
 
@@ -148,38 +195,3 @@ a:hover { color: var(--color-primary); }
 .empty__msg { margin-top: 6px; font: 400 13.5px/1.55 var(--font-body); color: var(--text-muted); }
 .htmx-request .htmx-indicator { opacity: 1; }
 .htmx-indicator { opacity: 0; transition: opacity 130ms; }
-
-/* ---- tela de acesso ---- */
-.acesso {
-  min-height: 100vh; display: grid; place-items: center;
-  padding: 24px; background: var(--gradient-soft);
-}
-.acesso__cartao {
-  width: 100%; max-width: 380px; display: grid; gap: 16px;
-  background: var(--surface-card); border: 1px solid var(--border-subtle);
-  border-radius: 16px; padding: 32px 28px; box-shadow: var(--shadow-md);
-}
-.acesso__logo { height: 30px; width: auto; justify-self: start; }
-.acesso__titulo { font-size: var(--text-lg); }
-.acesso__form { display: grid; gap: 14px; }
-.acesso__campo { display: grid; gap: 6px; }
-.acesso__rotulo {
-  font: 600 12px/1 var(--font-body); color: var(--text-muted);
-}
-.acesso__campo input {
-  min-height: 40px; padding: 0 12px; border-radius: 10px;
-  border: 1.5px solid var(--border-default); background: var(--surface-card);
-  font: 400 14px/1 var(--font-body); color: var(--text-strong);
-  transition: border-color 130ms, box-shadow 130ms;
-}
-.acesso__campo input:focus {
-  outline: none; border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--focus-ring);
-}
-.acesso__erro {
-  padding: 10px 12px; border-radius: 10px;
-  background: var(--ll-danger-bg); color: var(--ll-danger);
-  border: 1px solid var(--ll-danger);
-  font: 600 13px/1.4 var(--font-body);
-}
-.acesso__enviar { justify-content: center; margin-top: 2px; }

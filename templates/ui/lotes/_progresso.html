@@ -1,0 +1,71 @@
+{% comment %}
+Progresso e resultado do lote. O MESMO parcial serve à carga inicial e ao polling —
+uma forma só, sem divergir entre estados.
+{% endcomment %}
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:22px">{{ progresso.publicados }}</div><span class="stat__label">Publicados</span></div>
+    <div><div class="stat__value {% if progresso.falhos %}stat__value--alert{% endif %}" style="font-size:22px">{{ progresso.falhos }}</div><span class="stat__label">Falharam</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ progresso.pendentes }}</div><span class="stat__label">Na fila</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ progresso.percentual }}%</div><span class="stat__label">Andamento</span></div>
+    {% if lote.duracao_minutos %}
+    <div><div class="stat__value" style="font-size:22px">{{ lote.duracao_minutos }} min</div><span class="stat__label">Duração</span></div>
+    {% endif %}
+  </div>
+  <div style="margin-top:14px;height:10px;border-radius:999px;background:var(--surface-sunken);overflow:hidden">
+    <div style="height:100%;width:{{ progresso.percentual }}%;background:var(--color-primary);border-radius:999px"></div>
+  </div>
+</div>
+
+{% if falhos %}
+<div class="card" style="margin-bottom:16px;border-color:var(--ll-danger)">
+  <span class="stat__label" style="margin:0 0 12px">Falharam — cada uma com o motivo</span>
+  <div style="display:grid;gap:8px">
+    {% for i in falhos %}
+    <div style="display:grid;grid-template-columns:180px auto 1fr;gap:12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--border-subtle)">
+      <span style="font:600 13px/1.35 var(--font-display);color:var(--text-strong)">{{ i.machine.name }}</span>
+      <span>{% for r in i.rules %}<span class="blocker__rule">{{ r }}</span> {% endfor %}</span>
+      <span class="blocker__msg">{{ i.message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <p style="margin:12px 0 0;font:400 12.5px/1.55 var(--font-body);color:var(--text-muted);max-width:74ch">
+    Falha aqui geralmente significa que o cadastro mudou entre a triagem e a emissão.
+    Corrija o apontado e rode um novo lote — as máquinas já publicadas não repetem.
+  </p>
+</div>
+{% endif %}
+
+{% if publicados %}
+<div class="card" style="margin-bottom:16px">
+  <span class="stat__label" style="margin:0 0 12px">Publicados</span>
+  <table class="table">
+    <thead><tr><th>Máquina</th><th>Versão</th><th>Hash</th><th></th></tr></thead>
+    <tbody>
+      {% for i in publicados %}
+      <tr>
+        <td style="font:400 13px/1.4 var(--font-body)">{{ i.machine.name }}</td>
+        <td class="mono" style="font-size:12px">v{{ i.version_number }}</td>
+        <td class="mono" style="font-size:11.5px;color:var(--text-muted)">{{ i.content_hash|slice:":16" }}…</td>
+        <td>{% if i.document %}<a href="{% url 'documento' i.document.public_uuid %}">abrir</a>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if recusados %}
+<div class="card">
+  <span class="stat__label" style="margin:0 0 12px">Não entraram no lote</span>
+  <div style="display:grid;gap:6px">
+    {% for i in recusados %}
+    <div style="display:grid;grid-template-columns:180px auto 1fr;gap:12px;align-items:baseline;padding:6px 0;border-top:1px solid var(--border-subtle)">
+      <span style="font:600 12.5px/1.35 var(--font-display);color:var(--text-body)">{{ i.machine.name }}</span>
+      <span>{% for r in i.rules %}<span class="blocker__rule">{{ r }}</span> {% endfor %}</span>
+      <span style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">{{ i.message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

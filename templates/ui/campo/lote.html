@@ -1,0 +1,81 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Lote de campo{% endblock %}
+{% block crumbs %}<a href="{% url 'campo' %}">Sincronização de campo</a><span>›</span><span class="mono">{{ lote.client_batch_uuid|slice:":8" }}…</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ lote.device.label }} · {{ lote.device.operator }}</div>
+    <h1>Lote {{ lote.client_batch_uuid|slice:":8" }}…</h1>
+    <p>
+      Recebido em {{ lote.received_at|date:"d/m/Y H:i" }}
+      {% if lote.device_reported_at %} · o aparelho informou {{ lote.device_reported_at|date:"d/m/Y H:i" }}{% endif %}
+      · {{ lote.applied_count }} aplicado(s), {{ lote.failed_count }} falha(s), {{ lote.conflict_count }} conflito(s).
+    </p>
+  </div>
+</div>
+
+{% for aviso in avisos %}
+<div class="blocker" style="margin-bottom:12px;border-color:var(--ll-warning);background:var(--ll-warning-bg)">
+  <span class="blocker__rule" style="background:#fff;color:var(--ll-warning)">RELÓGIO</span>
+  <span><span class="blocker__title">{{ aviso }}</span></span>
+</div>
+{% endfor %}
+
+{% if conflitos %}
+<div class="card" style="border-color:var(--ll-danger);background:var(--ll-danger-bg);margin-bottom:16px">
+  <div style="font:800 20px/1.2 var(--font-display);color:var(--ll-danger)">{{ conflitos|length }} conflito(s) aguardando decisão</div>
+  <p style="margin:6px 0 0;font:400 13.5px/1.5 var(--font-body);color:var(--text-body);max-width:64ch">
+    O aparelho trouxe resposta diferente da que já existia na web. Nada foi sobrescrito.
+    Decida qual vale — reenviar o lote não muda nada.
+  </p>
+</div>
+<div style="display:grid;gap:10px;margin-bottom:18px">
+  {% for c in conflitos %}
+  <div class="blocker">
+    <span class="blocker__rule">{{ c.kind }}</span>
+    <span>
+      <span class="blocker__title">{{ c.message }}</span>
+      <span class="blocker__msg">Na web: <strong>{{ c.server_value }}</strong> · no aparelho: <strong>{{ c.device_value }}</strong></span>
+    </span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if falhas %}
+<div class="card" style="margin-bottom:16px">
+  <span class="stat__label" style="margin:0 0 10px">Registros não aplicados — o aparelho pode corrigir e reenviar</span>
+  <div style="display:grid;gap:8px">
+    {% for f in falhas %}
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--border-subtle)">
+      <span class="blocker__rule">{{ f.code }}</span>
+      <span class="blocker__msg">{{ f.message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <span class="stat__label" style="margin:0 0 12px">Registros do lote</span>
+  <table class="table">
+    <thead><tr><th>Tipo</th><th>Registro</th><th>Situação</th><th>Motivo</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td><strong>{{ r.get_record_type_display }}</strong></td>
+        <td class="mono">{{ r.client_uuid|slice:":8" }}…</td>
+        <td>
+          {% if r.status == 'applied' %}<span class="pill pill--ok">Aplicado</span>
+          {% elif r.status == 'conflict' %}<span class="pill pill--danger">Conflito</span>
+          {% elif r.status == 'duplicate' %}<span class="pill">Duplicado</span>
+          {% else %}<span class="pill pill--danger">Falhou</span>{% endif %}
+        </td>
+        <td style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">{{ r.failure_message|default:"—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

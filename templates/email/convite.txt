@@ -1,0 +1,16 @@
+Olá, {{ nome }}.
+
+{% if remetente %}{{ remetente }} criou{% else %}Foi criada{% endif %} uma conta para você na plataforma Life Laboral de gestão de risco de máquinas, com o perfil {{ perfil }}.
+
+Ninguém definiu uma senha para você. Crie a sua neste link:
+
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+O link vale por 24 horas e só pode ser usado uma vez. Se expirar, peça um novo convite a quem administra o acesso.
+{% if exige_mfa %}
+Seu perfil exige verificação em duas etapas. A configuração aparece no primeiro acesso.
+{% endif %}{% if publica %}
+Você é o único perfil que publica e assina peça técnica. Documento publicado leva sua responsabilidade e não pode ser apagado depois.
+{% endif %}
+Life Laboral · plataforma de gestão de risco de máquinas
+Mensagem automática — não responda a este endereço.

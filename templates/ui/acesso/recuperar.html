@@ -1,0 +1,69 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Redefinir senha · Life Laboral</title>
+<link rel="icon" href="{% static 'ds/logos/favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'ds/tokens/fonts.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/colors.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/typography.css' %}">
+<link rel="stylesheet" href="{% static 'ds/app.css' %}">
+<style>
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    padding: 40px 24px; background: var(--surface-page); color: var(--text-body);
+    font-family: var(--font-body); -webkit-font-smoothing: antialiased;
+  }
+  .cartao {
+    width: 100%; max-width: 420px; background: var(--surface-card);
+    border: 1px solid var(--border-subtle); border-radius: 16px; padding: 32px 30px;
+    box-shadow: var(--shadow-sm);
+  }
+  .logo { height: 26px; width: auto; margin-bottom: 22px; }
+  h1 { margin: 0 0 6px; font: 800 24px/1.2 var(--font-display); letter-spacing: -.025em; color: var(--text-strong); }
+  p { margin: 0 0 22px; font-size: 14.5px; line-height: 1.6; color: var(--text-muted); text-wrap: pretty; }
+  label { display: grid; gap: 5px; margin-bottom: 18px; }
+  label span { font: 700 11px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+  input {
+    min-height: 44px; padding: 0 14px; border-radius: 10px;
+    border: 1.5px solid var(--border-strong); background: var(--surface-card);
+    font: 400 14.5px/1 var(--font-body);
+  }
+  .btn { width: 100%; justify-content: center; min-height: 46px; }
+  .apoio { margin: 18px 0 0; font-size: 13px; }
+  .aviso {
+    padding: 13px 15px; border-radius: 10px; background: var(--ll-success-bg);
+    font: 400 13.5px/1.55 var(--font-body); color: var(--ll-success); margin: 0 0 20px;
+  }
+</style>
+</head>
+<body>
+<div class="cartao">
+  <img class="logo" src="{% static 'ds/logos/logo-horizontal.png' %}" alt="Life Laboral">
+  {% if enviado %}
+  <h1>Verifique seu e-mail</h1>
+  <p class="aviso">
+    Se existir conta para esse endereço, o link de redefinição chega em alguns minutos.
+    O link vale por 24 horas e só pode ser usado uma vez.
+  </p>
+  <p>
+    Não informamos se o endereço existe ou não — é proteção de privacidade, não falha.
+  </p>
+  <p class="apoio"><a href="{% url 'login' %}">Voltar para entrar</a></p>
+  {% else %}
+  <h1>Redefinir senha</h1>
+  <p>Informe o e-mail cadastrado. Enviaremos um link para você criar uma nova senha.</p>
+  <form method="post">
+    {% csrf_token %}
+    <label>
+      <span>E-mail</span>
+      <input type="email" name="email" autocomplete="username" required autofocus>
+    </label>
+    <button class="btn" type="submit">Enviar link</button>
+  </form>
+  <p class="apoio"><a href="{% url 'login' %}">Voltar para entrar</a></p>
+  {% endif %}
+</div>
+</body>
+</html>

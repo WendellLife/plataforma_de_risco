@@ -27,6 +27,10 @@ INSTALLED_APPS = [
     "apps.ativos",
     "apps.checklists",
     "apps.risco",
+    "apps.documentos",
+    "apps.campo",
+    "apps.planos",
+    "apps.lotes",
 ]
 
 MIDDLEWARE = [
@@ -56,6 +60,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context.shell",
+                "apps.core.context_marca.marca",
             ]
         },
     }
@@ -84,36 +89,96 @@ TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True
 
-# Autenticação — o painel exige sessão; ver apps/core/views.painel
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
+
+# Armazenamento do artefato publicado (Sprint 7).
+# O alias "documentos" é a ÚNICA porta usada por apps/documentos/armazenamento.py.
+# Sem DOCUMENTS_BUCKET o alias cai em disco local — bom para dev, nunca para produção.
+DOCUMENTS_BUCKET = os.environ.get("DOCUMENTS_BUCKET", "")
+DOCUMENTS_BUCKET_REGION = os.environ.get("DOCUMENTS_BUCKET_REGION", "us-east-1")
+DOCUMENTS_BUCKET_ENDPOINT = os.environ.get("DOCUMENTS_BUCKET_ENDPOINT", "")  # S3-compatível
+DOCUMENTS_URL_TTL = int(os.environ.get("DOCUMENTS_URL_TTL", "300"))  # segundos
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "documentos": (
+        {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": DOCUMENTS_BUCKET,
+                "region_name": DOCUMENTS_BUCKET_REGION,
+                "endpoint_url": DOCUMENTS_BUCKET_ENDPOINT or None,
+                "default_acl": "private",
+                "querystring_auth": True,        # URL de leitura sempre assinada
+                "querystring_expire": DOCUMENTS_URL_TTL,
+                "file_overwrite": False,         # prova publicada não é sobrescrita
+                "signature_version": "s3v4",
+                "addressing_style": "virtual",
+            },
+        }
+        if DOCUMENTS_BUCKET
+        else {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {"location": str(MEDIA_ROOT), "base_url": MEDIA_URL},
+        }
+    ),
+}
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Entrada e saída. Sem LOGIN_URL o Django manda para /accounts/login/, que não existe.
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "painel"
 LOGOUT_REDIRECT_URL = "login"
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-}
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# E-mail. Sem SMTP configurado, imprime no console — nunca falha em silêncio nem
+# finge ter enviado. O remetente carrega a marca da plataforma.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend"
+    if EMAIL_HOST
+    else "django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "Life Laboral <nao-responda@lifelaboral.com.br>"
+)
+PLATFORM_NAME = "Life Laboral"
+PLATFORM_SUPPORT_EMAIL = os.environ.get("PLATFORM_SUPPORT_EMAIL", "suporte@lifelaboral.com.br")
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TASK_ROUTES = {
     "apps.documentos.tasks.*": {"queue": "documentos"},
-    "apps.documentos.tasks.gerar_lote": {"queue": "lotes"},
+    "apps.lotes.tasks.*": {"queue": "lotes"},
+    "apps.planos.tasks.*": {"queue": "planos"},
     "apps.campo.tasks.*": {"queue": "sincronizacao"},
     "apps.ativos.tasks.*": {"queue": "midia"},
 }
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "apps.campo.auth.DeviceTokenAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.CursorPagination",
     "PAGE_SIZE": 50,
 }
+
+# Campo e sincronização (Sprint 8). O aparelho envia a foto DIRETO ao armazenamento.
+FIELD_PHOTO_MAX_BYTES = int(os.environ.get("FIELD_PHOTO_MAX_BYTES", "12000000"))
+FIELD_UPLOAD_TTL = int(os.environ.get("FIELD_UPLOAD_TTL", "900"))
+FIELD_TOKEN_DAYS = int(os.environ.get("FIELD_TOKEN_DAYS", "30"))
 
 # Assinatura de documento — ver Espec 06, AD-11
 SIGNING_MODE = os.environ.get("SIGNING_MODE", "simple")          # simple | qualified

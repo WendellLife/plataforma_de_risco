@@ -7,8 +7,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("healthz", healthz, name="healthz"),
     path("api/v1/", include("config.api_urls")),
-    path("accounts/", include("django.contrib.auth.urls")),
     path("", include("apps.core.urls")),
     path("", include("apps.ativos.urls")),
     path("", include("apps.clientes.urls")),
+    path("", include("apps.risco.urls")),
+    path("", include("apps.campo.urls")),
+    path("", include("apps.planos.urls")),
+    path("", include("apps.lotes.urls")),
+    path("", include("apps.documentos.urls")),
 ]

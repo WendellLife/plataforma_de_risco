@@ -14,6 +14,12 @@
       {% if maquina.serial_number %} · série <span class="mono">{{ maquina.serial_number }}</span>{% endif %}
     </p>
   </div>
+  <div style="display:flex;gap:8px">
+    <a class="btn btn--outline" href="{% url 'plano_maquina' maquina.public_uuid %}">Plano de ação</a>
+    {% if not shell.somente_leitura %}
+    <a class="btn" href="{% url 'apreciacao' maquina.public_uuid %}">Apreciação de risco</a>
+    {% endif %}
+  </div>
 </div>
 
 {% with faltando=maquina.fontes_sem_bloqueio %}

@@ -16,6 +16,8 @@ from .enums import (
 
 
 class Project(RegistroTenant):
+    caminho_para_cliente = "client_id"
+
     """Agrupador contratual: ART, engenheiro responsável e analista."""
 
     client = models.ForeignKey("clientes.Client", on_delete=models.PROTECT, related_name="projects")
@@ -42,6 +44,8 @@ class Project(RegistroTenant):
 
 
 class Machine(RegistroTenant):
+    caminho_para_cliente = "client_id"
+
     client = models.ForeignKey("clientes.Client", on_delete=models.PROTECT, related_name="machines")
     org_unit = models.ForeignKey(
         "clientes.OrgUnit", null=True, blank=True, on_delete=models.PROTECT, related_name="machines"

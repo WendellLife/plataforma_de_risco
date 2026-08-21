@@ -1,0 +1,251 @@
+/* Estilo de impressão dos documentos — Espec 03, item 4.
+   Incluído em linha porque o compositor de PDF não resolve URL de estático.
+   Nenhuma regra de tela aqui: este arquivo governa papel. */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  --ll-teal: #43B5B6;
+  --ll-teal-700: #2b8283;
+  --ll-teal-100: #d8f0f0;
+  --ll-teal-050: #eef9f9;
+  --ll-blue: #0086C4;
+  --ll-blue-700: #0d5b85;
+  --ll-navy-900: #082c52;
+  --ll-navy: #0D4B86;
+  --ll-ink: #12232e;
+  --ll-slate-700: #33454f;
+  --ll-slate-500: #5b6b74;
+  --ll-slate-200: #d9e0e4;
+  --ll-slate-100: #eceff1;
+  --ll-slate-050: #f5f7f8;
+  --ll-success: #2f9e6b;
+  --ll-success-bg: #e4f4ec;
+  --ll-warning: #d9922b;
+  --ll-warning-bg: #fbf0dc;
+  --ll-danger: #d24b46;
+  --ll-danger-bg: #fbe7e6;
+  --font-display: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --text-strong: var(--ll-ink);
+  --text-body: var(--ll-slate-700);
+  --text-muted: var(--ll-slate-500);
+  --border-subtle: var(--ll-slate-200);
+}
+
+@page {
+  size: A4;
+  margin: 20mm 18mm 18mm;
+  @top-left {
+    content: string(doc-titulo);
+    font: 600 7.5pt/1.2 'Manrope', Arial, sans-serif;
+    color: #5b6b74;
+    padding-bottom: 2mm;
+  }
+  @top-right {
+    content: string(doc-numero);
+    font: 600 7.5pt/1.2 'Manrope', Arial, sans-serif;
+    color: #5b6b74;
+  }
+  @bottom-left {
+    content: 'Life Laboral · documento gerado pela plataforma de gestão de risco';
+    font: 400 7pt/1.2 'Manrope', Arial, sans-serif;
+    color: #84949c;
+  }
+  @bottom-right {
+    content: 'página ' counter(page) ' de ' counter(pages);
+    font: 600 7pt/1.2 'Manrope', Arial, sans-serif;
+    color: #5b6b74;
+  }
+}
+
+@page capa { margin: 0; @top-left { content: none; } @top-right { content: none; }
+  @bottom-left { content: none; } @bottom-right { content: none; } }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 400 10.5pt/1.6 var(--font-body);
+  color: var(--text-body);
+  -weasy-hyphens: auto;
+}
+
+.capa {
+  page: capa;
+  break-after: page;
+  height: 297mm;
+  padding: 26mm 22mm;
+  background: linear-gradient(135deg, #082c52 0%, #0D4B86 46%, #0086C4 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.capa__logo { height: 11mm; width: auto; display: block; margin-bottom: 16mm; }
+.capa__eyebrow {
+  font: 700 8pt/1 var(--font-display); letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+}
+.capa__titulo {
+  margin: 5mm 0 0; font: 800 30pt/1.08 var(--font-display); letter-spacing: -.02em; color: #fff;
+  string-set: doc-titulo content();
+}
+.capa__sub { margin: 4mm 0 0; font: 400 12pt/1.5 var(--font-body); color: rgba(255,255,255,.86); max-width: 120mm; }
+.capa__meta { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; }
+.capa__campo { border-top: .75pt solid rgba(255,255,255,.34); padding-top: 2.5mm; }
+.capa__rotulo {
+  display: block; font: 700 7pt/1.2 var(--font-display); letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.66);
+}
+.capa__valor { display: block; margin-top: 1.5mm; font: 600 10.5pt/1.35 var(--font-body); color: #fff; }
+.capa__numero { string-set: doc-numero content(); }
+
+.selo {
+  display: inline-block; margin-top: 8mm; padding: 2.5mm 5mm; border-radius: 2mm;
+  font: 700 9pt/1 var(--font-display); letter-spacing: .1em; text-transform: uppercase;
+}
+.selo--minuta { background: #fbe7e6; color: #9a2e2a; }
+.selo--publicado { background: rgba(255,255,255,.16); color: #fff; box-shadow: inset 0 0 0 .75pt rgba(255,255,255,.5); }
+
+.marca-agua {
+  position: fixed; top: 118mm; left: 0; width: 100%;
+  text-align: center; transform: rotate(-24deg);
+  font: 800 54pt/1 var(--font-display); letter-spacing: .06em;
+  color: rgba(210,75,70,.11);
+}
+
+h2.secao {
+  margin: 12mm 0 4mm; padding-bottom: 2.5mm;
+  border-bottom: 1.5pt solid var(--ll-teal-100);
+  font: 700 14pt/1.2 var(--font-display); letter-spacing: -.01em; color: var(--text-strong);
+  break-after: avoid;
+}
+h3.sub {
+  margin: 6mm 0 3mm; font: 700 11pt/1.3 var(--font-display); color: var(--ll-blue-700);
+  break-after: avoid;
+}
+p { margin: 0 0 3mm; orphans: 3; widows: 3; text-wrap: pretty; }
+
+.grade2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10mm; }
+.campo { padding: 2.2mm 0; border-bottom: .75pt solid var(--border-subtle); }
+.campo__rotulo {
+  display: block; font: 700 7pt/1.2 var(--font-display); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.campo__valor { display: block; margin-top: .8mm; font: 600 10pt/1.4 var(--font-body); color: var(--text-strong); }
+
+table { width: 100%; border-collapse: collapse; }
+thead { display: table-header-group; }
+th {
+  text-align: left; padding: 2.4mm 3mm; background: var(--ll-slate-050);
+  font: 700 7.5pt/1.2 var(--font-display); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); border-bottom: 1pt solid var(--ll-slate-200);
+}
+td {
+  padding: 2.4mm 3mm; font: 400 9pt/1.45 var(--font-body); color: var(--text-body);
+  border-bottom: .75pt solid var(--border-subtle); vertical-align: top;
+}
+tr { break-inside: avoid; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.faixa {
+  display: inline-block; padding: .8mm 2.4mm; border-radius: 1.5mm;
+  font: 700 7.5pt/1.3 var(--font-body); white-space: nowrap;
+}
+.faixa--ok { background: var(--ll-success-bg); color: var(--ll-success); }
+.faixa--medio { background: var(--ll-warning-bg); color: #8a5a14; }
+.faixa--alto { background: var(--ll-danger-bg); color: #9a2e2a; }
+.faixa--vazio { background: var(--ll-slate-100); color: var(--text-muted); }
+
+.nota {
+  margin: 4mm 0 0; padding: 3mm 4mm; border-radius: 2.5mm;
+  font: 400 8.5pt/1.6 var(--font-body); break-inside: avoid;
+}
+.nota--alerta { background: var(--ll-warning-bg); color: #8a5a14; }
+.nota--erro { background: var(--ll-danger-bg); color: #9a2e2a; }
+.nota--info { background: var(--ll-teal-050); color: var(--ll-teal-700); }
+
+/* ---- painel do verificador impresso na minuta ---- */
+.verificacao { break-before: page; }
+.verificacao__aviso {
+  padding: 5mm 6mm; border-radius: 3mm; background: var(--ll-danger-bg);
+  border: 1pt solid var(--ll-danger); margin-bottom: 6mm;
+}
+.verificacao__titulo { margin: 0 0 2mm; font: 700 13pt/1.25 var(--font-display); color: #9a2e2a; }
+.bloqueio {
+  display: grid; grid-template-columns: 16mm 1fr; gap: 4mm;
+  padding: 3.5mm 0; border-bottom: .75pt solid var(--border-subtle); break-inside: avoid;
+}
+.bloqueio__regra {
+  font: 600 8.5pt/1.3 var(--font-mono); color: #9a2e2a;
+  padding: 1mm 0; text-align: center; background: #fff; border-radius: 1.5mm;
+  height: fit-content;
+}
+.bloqueio--aviso .bloqueio__regra { color: #8a5a14; }
+.bloqueio__msg { font: 400 9.5pt/1.5 var(--font-body); color: var(--text-strong); }
+.bloqueio__caminho {
+  display: block; margin-top: 1mm;
+  font: 500 8pt/1.4 var(--font-mono); color: var(--ll-blue-700);
+}
+
+.risco { break-inside: avoid; margin-bottom: 7mm; padding-bottom: 5mm; border-bottom: .75pt solid var(--border-subtle); }
+.risco__cabecalho { display: flex; justify-content: space-between; align-items: baseline; gap: 5mm; margin-bottom: 2.5mm; }
+.risco__zona { font: 700 11pt/1.3 var(--font-display); color: var(--text-strong); }
+.risco__tipo { font: 600 8pt/1.2 var(--font-body); color: var(--text-muted); white-space: nowrap; }
+.hrn { display: grid; grid-template-columns: repeat(4, 1fr) 22mm; gap: 3mm; margin: 3mm 0; }
+.hrn__cel { text-align: center; padding: 2mm 1mm; background: var(--ll-slate-050); border-radius: 2mm; }
+.hrn__rotulo { display: block; font: 700 6.5pt/1.2 var(--font-display); letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+.hrn__valor { display: block; margin-top: .8mm; font: 700 11pt/1 var(--font-display); color: var(--text-strong); }
+.hrn__cel--total { background: var(--ll-teal-050); }
+
+.assinatura { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 16mm; break-inside: avoid; }
+.assinatura__linha { border-top: .75pt solid var(--ll-slate-500); padding-top: 2mm; text-align: center; }
+.assinatura__nome { font: 700 10pt/1.35 var(--font-body); color: var(--text-strong); }
+.assinatura__papel { font: 400 8.5pt/1.4 var(--font-body); color: var(--text-muted); }
+
+.rodape-tecnico {
+  margin-top: 10mm; padding-top: 3mm; border-top: .75pt solid var(--border-subtle);
+  font: 400 7.5pt/1.5 var(--font-body); color: var(--text-muted);
+}
+
+/* ---- controles só de tela (prévia) ---- */
+.barra-previa {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px; background: #12232e; color: #fff;
+  font: 600 12px/1 var(--font-body);
+}
+.barra-previa a { color: #7fcecf; text-decoration: none; }
+.barra-previa a:hover { color: #fff; }
+@media print { .barra-previa { display: none; } }
+@media screen {
+  body { background: #eceff1; }
+  .folha { width: 210mm; margin: 18px auto; padding: 20mm 18mm; background: #fff; box-shadow: 0 2px 18px rgba(18,35,46,.14); }
+  .capa { width: 210mm; margin: 18px auto 0; }
+}
+
+/* Verificação pública (CA-06) — impresso no encerramento de todo documento publicado. */
+.verificacao-qr{
+  display:grid;grid-template-columns:22mm 1fr;gap:6mm;align-items:center;
+  margin:8mm 0 4mm;padding:5mm 6mm;border:.75pt solid var(--border-subtle);border-radius:3mm;
+  background:var(--ll-slate-050);break-inside:avoid;
+}
+.verificacao-qr__codigo{display:block;width:22mm;height:22mm}
+.verificacao-qr__codigo svg{display:block;width:100%;height:100%}
+.verificacao-qr__texto{font:400 8.5pt/1.55 var(--font-body);color:var(--text-body);text-wrap:pretty}
+.verificacao-qr__url{font:500 8.5pt/1.5 var(--font-mono);color:var(--ll-teal-700);word-break:break-all}
+
+/* Co-marca da capa. O emissor técnico e o contratante aparecem juntos e distintos —
+   substituir um pelo outro tornaria ambígua a responsabilidade técnica da peça. */
+.capa__marcas { display: flex; align-items: center; gap: 6mm; margin-bottom: 8mm; }
+.capa__marcas-sep {
+  width: .75pt; height: 9mm; background: rgba(255,255,255,.28); flex: none;
+}
+.capa__contratante { display: grid; gap: 1mm; }
+.capa__contratante-rotulo {
+  font: 700 6.5pt/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+}
+.capa__contratante-nome {
+  font: 700 11pt/1.2 var(--font-display); color: #fff; letter-spacing: -.01em;
+}

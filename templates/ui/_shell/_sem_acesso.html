@@ -1,0 +1,18 @@
+{% comment %}
+Vazio por FALTA DE ACESSO é diferente de vazio por falta de dado. Confundir os dois faz
+o usuário procurar um problema onde não há — ou pior, achar que perdeu trabalho.
+Inclua este parcial antes de qualquer estado vazio de lista.
+{% endcomment %}
+{% if shell.sem_carteira %}
+<div class="blocker" style="margin-bottom:16px;border-color:var(--ll-warning);background:var(--ll-warning-bg)">
+  <span class="blocker__rule" style="background:#fff;color:var(--ll-warning)">ACESSO</span>
+  <span>
+    <span class="blocker__title">Você ainda não tem clientes atribuídos</span>
+    <span class="blocker__msg">
+      As telas aparecem vazias porque nenhum cliente foi liberado para o seu acesso — não
+      porque falte cadastro. Peça ao administrador da sua organização para atribuir os
+      clientes que você atende.
+    </span>
+  </span>
+</div>
+{% endif %}

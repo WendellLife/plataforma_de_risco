@@ -1,0 +1,95 @@
+{% comment %}
+Painel do verificador. Bloco de tela, nunca toast: o usuário sai para corrigir o
+cadastro e volta com a lista no mesmo lugar (Espec 04, item 5).
+{% endcomment %}
+<div id="painel-verificador"
+     hx-get="{% url 'bloqueios_documento' documento.public_uuid %}"
+     hx-trigger="every 30s"
+     hx-swap="outerHTML">
+
+{% if ctx.bloqueios %}
+<div class="card" style="border-color:var(--ll-danger);background:var(--ll-danger-bg);margin-bottom:14px">
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <div>
+      <div style="font:800 20px/1.2 var(--font-display);color:var(--ll-danger)">
+        {{ ctx.bloqueios|length }} bloqueio(s) impedem a publicação
+      </div>
+      <p style="margin:6px 0 0;font:400 13.5px/1.5 var(--font-body);color:var(--text-body);max-width:64ch">
+        Todos os motivos aparecem de uma vez, com o caminho de correção. Corrija o cadastro
+        e volte — a emissão continua daqui, sem refazer o documento.
+      </p>
+    </div>
+    <button class="btn btn--outline" style="margin-left:auto;background:#fff"
+            hx-get="{% url 'bloqueios_documento' documento.public_uuid %}"
+            hx-target="#painel-verificador" hx-swap="outerHTML">Verificar de novo</button>
+  </div>
+</div>
+
+<div style="display:grid;gap:10px;margin-bottom:18px">
+  {% for b in ctx.bloqueios %}
+  <div class="blocker">
+    <span class="blocker__rule">{{ b.regra }}</span>
+    <span>
+      <span class="blocker__title">{{ b.mensagem }}</span>
+      {% if b.entidade.label %}<span class="blocker__msg">{{ b.entidade.type }}: {{ b.entidade.label }}</span>{% endif %}
+    </span>
+    {% if b.caminho_correcao %}
+    <a class="btn btn--outline" style="background:#fff" href="{{ b.caminho_correcao }}">Corrigir</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="border-color:var(--ll-success);background:var(--ll-success-bg);margin-bottom:18px">
+  <div style="font:800 20px/1.2 var(--font-display);color:var(--ll-success)">Verificador sem bloqueios</div>
+  <p style="margin:6px 0 0;font:400 13.5px/1.5 var(--font-body);color:var(--text-body);max-width:64ch">
+    As {{ template.regras|length }} regra(s) exigidas por este template passaram.
+    {% if template.exige_engenheiro %}A publicação é ato do engenheiro responsável e gera versão imutável com hash de conteúdo.{% else %}A publicação gera versão imutável assinada pela organização.{% endif %}
+  </p>
+</div>
+{% endif %}
+
+{% if ctx.avisos %}
+<div class="card" style="margin-bottom:18px">
+  <span class="stat__label" style="margin:0 0 10px">Avisos — não impedem a publicação</span>
+  <div style="display:grid;gap:8px">
+    {% for a in ctx.avisos %}
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--border-subtle)">
+      <span class="blocker__rule" style="background:var(--ll-warning-bg);color:var(--ll-warning)">{{ a.regra }}</span>
+      <span class="blocker__msg">{{ a.mensagem }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <span class="stat__label" style="margin:0 0 12px">O que este documento vai conter</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:22px">{{ ctx.dados.riscos|length }}</div><span class="stat__label">Zonas de perigo</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ ctx.dados.fontes|length }}</div><span class="stat__label">Fontes de energia</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ ctx.dados.componentes|length }}</div><span class="stat__label">Dispositivos</span></div>
+    {% if ctx.consolidacao %}
+    <div>
+      <div class="stat__value {% if ctx.consolidacao.intoleraveis_depois %}stat__value--alert{% endif %}" style="font-size:22px">{{ ctx.consolidacao.intoleraveis_antes }} → {{ ctx.consolidacao.intoleraveis_depois }}</div>
+      <span class="stat__label">Zonas intoleráveis</span>
+    </div>
+    {% endif %}
+    {% if ctx.dados.conformidade %}
+    <div>
+      <div class="stat__value" style="font-size:22px">{{ ctx.dados.conformidade.percentual_base_fixa }}%</div>
+      <span class="stat__label">Conformidade · base fixa</span>
+    </div>
+    <div>
+      <div class="stat__value" style="font-size:22px">{{ ctx.dados.conformidade.percentual_avaliados }}%</div>
+      <span class="stat__label">Conformidade · avaliados</span>
+    </div>
+    {% endif %}
+  </div>
+  <p style="margin:14px 0 0;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+    As seções do documento vêm do catálogo de templates, versionado com o código —
+    {{ template.secoes|length }} seções em {{ template.chave_legada }} rev. {{ template.revisao }}.
+  </p>
+</div>
+
+</div>

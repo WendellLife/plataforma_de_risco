@@ -1,0 +1,81 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}{{ documento.number }}{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ template.chave_legada }} · revisão {{ template.revisao }}</div>
+    <h1>{{ template.nome }}</h1>
+    <p>
+      <span class="mono">{{ documento.number }}</span> ·
+      {{ documento.machine.name }} · {{ documento.machine.client.legal_name }} ·
+      assinatura por {{ template.rotulo_trilha }}
+    </p>
+  </div>
+  <div class="pagehead__actions">
+    <a class="btn btn--outline" href="{% url 'previa_documento' documento.public_uuid %}" target="_blank" rel="noopener">Ver prévia</a>
+    {% if documento.current_version %}
+    <a class="btn btn--outline" href="{% url 'pdf_documento' documento.public_uuid %}" target="_blank" rel="noopener">Baixar PDF</a>
+    {% endif %}
+    <form method="post" action="{% url 'publicar_documento' documento.public_uuid %}" style="display:inline">
+      {% csrf_token %}
+      <button class="btn btn--primary" type="submit" {% if not pode_publicar %}disabled title="O verificador tem bloqueios abertos"{% endif %}>
+        {% if documento.current_version %}Publicar nova versão{% else %}Publicar{% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if messages %}{% for m in messages %}
+<div class="blocker" style="margin-bottom:16px;{% if m.tags == 'success' %}background:var(--ll-success-bg);border-color:var(--ll-success){% endif %}">
+  <span class="blocker__rule">{{ m.tags|default:"info" }}</span>
+  <span class="blocker__msg">{{ m }}</span>
+  <span></span>
+</div>
+{% endfor %}{% endif %}
+
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start">
+  <div>
+    {% include "ui/documentos/_bloqueios.html" %}
+    {% if documento.current_version %}
+    <div class="card" style="margin-top:14px">
+      <span class="stat__label" style="margin:0 0 10px">Prova do arquivo publicado</span>
+      <div hx-get="{% url 'integridade_documento' documento.public_uuid %}"
+           hx-trigger="load" hx-swap="outerHTML">
+        <div class="empty__msg" style="margin:0">Conferindo o binário no armazenamento…</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside style="display:grid;gap:14px">
+    <div class="card">
+      <span class="stat__label" style="margin:0 0 10px">Este documento</span>
+      <div style="display:grid;gap:8px;font:400 13px/1.45 var(--font-body)">
+        <div><strong>Situação</strong><br>{{ documento.get_status_display }}</div>
+        <div><strong>Máquina</strong><br><a href="/maquinas/{{ documento.machine.public_uuid }}/">{{ documento.machine.name }}</a></div>
+        <div><strong>Projeto · ART</strong><br>{{ documento.project.number|default:"—" }} · {{ documento.project.art_number|default:"não registrada" }}</div>
+        <div><strong>Método HRN</strong><br>versão {{ ctx.method_versions.hrn }}</div>
+        <div><strong>Regras exigidas</strong><br>{% for r in template.regras %}<span class="mono">{{ r }}</span>{% if not forloop.last %} · {% endif %}{% endfor %}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="stat__label" style="margin:0 0 10px">Versões publicadas</span>
+      {% for v in versoes %}
+      <div style="padding:8px 0;border-bottom:1px solid var(--border-subtle)">
+        <div style="font:700 13px/1.3 var(--font-body);color:var(--text-strong)">v{{ v.number }} · {{ v.published_at|date:"d/m/Y H:i" }}</div>
+        <div style="font:400 12px/1.45 var(--font-body);color:var(--text-muted)">
+          {{ v.published_by|default:"—" }}<br>
+          {% if v.render_status == 'rendered' %}PDF com {{ v.page_count }} página(s){% elif v.render_status == 'failed' %}<span style="color:var(--ll-danger)">falha na composição</span>{% else %}composição na fila{% endif %} ·
+          {{ v.get_signature_status_display }}
+        </div>
+        <div class="mono" style="font-size:10.5px;word-break:break-all">{{ v.content_hash|slice:":32" }}…</div>
+      </div>
+      {% empty %}
+      <div class="empty__msg" style="text-align:left">Nenhuma versão publicada. A minuta pode ser compartilhada; ela carrega os próprios bloqueios impressos.</div>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

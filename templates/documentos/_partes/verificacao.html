@@ -1,0 +1,39 @@
+{% comment %}
+Painel do verificador impresso NO documento — Espec 01, item 7.
+A minuta carrega os próprios bloqueios: quem recebe o rascunho sabe exatamente o que
+falta e onde corrigir. Documento publicado nunca tem bloqueio; pode ter aviso.
+{% endcomment %}
+<section class="verificacao">
+  {% if bloqueios %}
+  <div class="verificacao__aviso">
+    <h2 class="verificacao__titulo">Esta minuta não pode ser publicada</h2>
+    <p style="margin:0;font:400 9.5pt/1.55 var(--font-body);color:#9a2e2a">
+      O verificador de coerência recusou a publicação por {{ bloqueios|length }} motivo(s).
+      Todos estão listados abaixo, com o caminho de correção. Corrigido o cadastro, a
+      emissão prossegue sem refazer o documento.
+    </p>
+  </div>
+  {% for b in bloqueios %}
+  <div class="bloqueio">
+    <span class="bloqueio__regra">{{ b.regra }}</span>
+    <span class="bloqueio__msg">
+      {{ b.mensagem }}
+      {% if b.caminho_correcao %}<span class="bloqueio__caminho">corrigir em {{ b.caminho_correcao }}</span>{% endif %}
+    </span>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if avisos %}
+  <h3 class="sub" style="margin-top:{% if bloqueios %}8mm{% else %}0{% endif %}">Avisos que não impedem a publicação</h3>
+  {% for a in avisos %}
+  <div class="bloqueio bloqueio--aviso">
+    <span class="bloqueio__regra">{{ a.regra }}</span>
+    <span class="bloqueio__msg">
+      {{ a.mensagem }}
+      {% if a.caminho_correcao %}<span class="bloqueio__caminho">verificar em {{ a.caminho_correcao }}</span>{% endif %}
+    </span>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
