@@ -157,6 +157,12 @@ PLATFORM_SUPPORT_EMAIL = os.environ.get("PLATFORM_SUPPORT_EMAIL", "suporte@lifel
 
 CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_TASK_ALWAYS_EAGER = os.environ.get("CELERY_TASK_ALWAYS_EAGER", "0").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 CELERY_TASK_ROUTES = {
     "apps.documentos.tasks.*": {"queue": "documentos"},
     "apps.lotes.tasks.*": {"queue": "lotes"},
