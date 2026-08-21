@@ -1,24 +1,24 @@
-# Blueprint do Render — cria banco, Redis, web e worker em um passo.
+# Blueprint gratuito do Render para demonstração — cria banco, Redis e web.
 # No Render: New › Blueprint › aponte para este repositório.
 
 databases:
   - name: risco-db
     databaseName: risco
     user: risco
-    plan: basic-256mb
+    plan: free
     postgresMajorVersion: "16"
 
 services:
   - type: redis
     name: risco-redis
-    plan: starter
+    plan: free
     maxmemoryPolicy: noeviction   # fila Celery não pode perder tarefa
     ipAllowList: []
 
   - type: web
     name: risco-web
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: "./build.sh"
     startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120"
     healthCheckPath: /healthz
@@ -39,21 +39,6 @@ services:
         value: simple
       - key: WEB_CONCURRENCY
         value: "3"
-
-  - type: worker
-    name: risco-worker
-    runtime: python
-    plan: starter
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "celery -A config worker -Q documentos,lotes,sincronizacao,midia -l info --concurrency 2"
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: config.settings.prod
-      - key: PYTHON_VERSION
-        value: 3.12.6
-      - key: SECRET_KEY
-        fromService: {name: risco-web, type: web, envVarKey: SECRET_KEY}
-      - key: DATABASE_URL
-        fromDatabase: {name: risco-db, property: connectionString}
-      - key: REDIS_URL
-        fromService: {name: risco-redis, type: redis, property: connectionString}
+      # O plano gratuito não oferece worker. As tarefas rodam no processo web.
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "1"

@@ -1,0 +1,120 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Novo usuário{% endblock %}
+{% block crumbs %}<a href="{% url 'usuarios' %}">Acesso e visibilidade</a> <span>/</span> <span>Novo usuário</span>{% endblock %}
+
+{% comment %}
+Uma tela, duas decisões inseparáveis: que perfil a pessoa tem e que clientes ela vê.
+Separá-las produziria, no intervalo, uma conta que existe e não vê nada.
+Não há campo de senha: quem cria a conta não fica sabendo a credencial de ninguém.
+{% endcomment %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Acesso</div>
+    <h1>Novo usuário</h1>
+    <p>
+      A conta é criada sem senha: a pessoa recebe um convite por e-mail e cria a própria,
+      com link de uso único válido por 24 horas. Perfil e clientes são definidos aqui,
+      juntos — perfil diz o que ela pode fazer, os clientes dizem o que ela vê.
+    </p>
+  </div>
+</div>
+
+{% if erros %}
+<div class="blocker" style="margin-bottom:16px">
+  <span class="blocker__rule">REVER</span>
+  <span>
+    <span class="blocker__title">Ajuste antes de criar a conta</span>
+    {% for e in erros %}<span class="blocker__msg">{{ e }}</span>{% endfor %}
+  </span>
+</div>
+{% endif %}
+
+<form method="post" action="{% url 'novo_usuario' %}" style="display:grid;gap:16px;max-width:820px">
+  {% csrf_token %}
+
+  <div class="card">
+    <span class="stat__label" style="margin:0 0 10px">Quem é</span>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <label style="display:grid;gap:5px">
+        <span style="font:600 12.5px/1.4 var(--font-display);color:var(--text-strong)">Nome</span>
+        <input class="field" type="text" name="first_name" value="{{ dados.first_name|default:'' }}" autocomplete="off">
+      </label>
+      <label style="display:grid;gap:5px">
+        <span style="font:600 12.5px/1.4 var(--font-display);color:var(--text-strong)">Sobrenome</span>
+        <input class="field" type="text" name="last_name" value="{{ dados.last_name|default:'' }}" autocomplete="off">
+      </label>
+      <label style="display:grid;gap:5px">
+        <span style="font:600 12.5px/1.4 var(--font-display);color:var(--text-strong)">E-mail</span>
+        <input class="field" type="email" name="email" value="{{ dados.email|default:'' }}" required autocomplete="off" placeholder="pessoa@empresa.com.br">
+        <span style="font:400 12px/1.5 var(--font-body);color:var(--text-muted)">É por ele que a pessoa entra e recebe o convite.</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="stat__label" style="margin:0 0 4px">O que ela pode fazer</span>
+    <span style="display:block;margin-bottom:10px;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+      Só engenheiro publica e assina peça técnica — nem administrador. Registro é de
+      pessoa física, não de cargo.
+    </span>
+    <div style="display:grid;gap:8px">
+      {% for p in perfis %}
+      <label style="display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--border-subtle);border-radius:10px;cursor:pointer;background:var(--surface-card)">
+        <input type="radio" name="role" value="{{ p.valor }}" {% if dados.role == p.valor %}checked{% endif %}
+               style="margin-top:2px;width:16px;height:16px;accent-color:var(--color-primary)">
+        <span style="display:grid;gap:3px">
+          <span style="font:700 13.5px/1.3 var(--font-display);color:var(--text-strong)">
+            {{ p.nome }}
+            {% if not p.tem_carteira %}<span class="pill" style="margin-left:6px">vê toda a organização</span>{% endif %}
+          </span>
+          <span style="font:400 12.5px/1.55 var(--font-body);color:var(--text-muted)">{{ p.descricao }}</span>
+        </span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="stat__label" style="margin:0 0 4px">O que ela vê</span>
+    <span style="display:block;margin-bottom:10px;font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+      Vale para todos os perfis, menos administrador. Administrador vê a organização
+      inteira e ignora esta lista.
+    </span>
+    {% if clientes %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px">
+      {% for c in clientes %}
+      <label style="display:flex;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:7px;cursor:pointer;background:var(--surface-card)">
+        <input type="checkbox" name="clientes" value="{{ c.pk }}" {% if c.pk in dados.clientes %}checked{% endif %}
+               style="width:16px;height:16px;accent-color:var(--color-primary)">
+        <span style="font:400 13px/1.35 var(--font-body);color:var(--text-body)">{{ c.legal_name }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    {% if pedir_confirmacao %}
+    <label style="display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding:11px 14px;border-radius:9px;border:1.5px solid var(--ll-warning);background:var(--ll-warning-bg);cursor:pointer">
+      <input type="checkbox" name="sem_acesso" value="1" style="margin-top:2px;width:16px;height:16px;accent-color:var(--ll-warning)">
+      <span style="font:400 12.5px/1.55 var(--font-body);color:var(--text-body)">
+        Criar sem nenhum cliente. Entendo que a pessoa vai entrar e encontrar todas as
+        telas vazias até receber acesso na tela de acesso e visibilidade.
+      </span>
+    </label>
+    {% endif %}
+    {% else %}
+    <div class="empty__msg">
+      Nenhum cliente cadastrado ainda. Você pode criar a conta agora e atribuir clientes
+      depois — ou cadastrar o primeiro cliente antes.
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button class="btn" type="submit">Criar e enviar convite</button>
+    <a class="btn btn--outline" href="{% url 'usuarios' %}">Cancelar</a>
+    <span style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted)">
+      A criação e a carteira inicial ficam na trilha de auditoria.
+    </span>
+  </div>
+</form>
+{% endblock %}

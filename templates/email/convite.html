@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+{% comment %}
+Convite de acesso. Marca da PLATAFORMA, nunca de um cliente: quem recebe está sendo
+apresentado ao sistema, não a um contratante. Tabela e estilo inline porque cliente de
+e-mail não aplica CSS externo de forma confiável.
+{% endcomment %}
+<body style="margin:0;padding:0;background:#f5f7f8">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7f8">
+  <tr><td align="center" style="padding:32px 16px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid #d9e0e4;border-radius:14px;overflow:hidden">
+
+      <tr><td style="background:#12232e;padding:22px 28px">
+        <span style="font:700 17px/1.2 'Manrope',Helvetica,Arial,sans-serif;color:#ffffff;letter-spacing:-.01em">Life<span style="color:#43B5B6">Laboral</span></span>
+      </td></tr>
+
+      <tr><td style="padding:30px 28px 8px">
+        <h1 style="margin:0 0 10px;font:800 22px/1.25 'Manrope',Helvetica,Arial,sans-serif;color:#12232e;letter-spacing:-.02em">Seu acesso está pronto</h1>
+        <p style="margin:0 0 14px;font:400 15px/1.6 'Manrope',Helvetica,Arial,sans-serif;color:#33454f">
+          Olá, {{ nome }}. {% if remetente %}{{ remetente }} criou{% else %}Foi criado{% endif %}
+          uma conta para você na plataforma de gestão de risco de máquinas, com o perfil
+          <strong style="color:#12232e">{{ perfil }}</strong>.
+        </p>
+        <p style="margin:0 0 18px;font:400 15px/1.6 'Manrope',Helvetica,Arial,sans-serif;color:#33454f">
+          Ninguém definiu uma senha para você — crie a sua pelo botão abaixo.
+        </p>
+      </td></tr>
+
+      <tr><td style="padding:0 28px 22px">
+        <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}"
+           style="display:inline-block;padding:13px 26px;border-radius:999px;background:#43B5B6;color:#12232e;font:700 14px/1 'Manrope',Helvetica,Arial,sans-serif;text-decoration:none">
+          Criar minha senha
+        </a>
+      </td></tr>
+
+      <tr><td style="padding:0 28px 26px">
+        <p style="margin:0 0 14px;font:400 13.5px/1.6 'Manrope',Helvetica,Arial,sans-serif;color:#5b6b74">
+          O link vale por <strong style="color:#33454f">24 horas</strong> e só pode ser
+          usado uma vez. Se expirar, peça um novo convite a quem administra o acesso.
+        </p>
+        {% if exige_mfa %}
+        <p style="margin:0 0 14px;padding:13px 15px;border-radius:9px;background:#f5f7f8;font:400 13px/1.6 'Manrope',Helvetica,Arial,sans-serif;color:#5b6b74">
+          Seu perfil exige <strong style="color:#33454f">verificação em duas etapas</strong>.
+          A configuração aparece no primeiro acesso.
+        </p>
+        {% endif %}
+        {% if publica %}
+        <p style="margin:0;padding:13px 15px;border-radius:9px;background:#f5f7f8;font:400 13px/1.6 'Manrope',Helvetica,Arial,sans-serif;color:#5b6b74">
+          Você é o único perfil que <strong style="color:#33454f">publica e assina</strong>
+          peça técnica. Documento publicado leva sua responsabilidade — e não pode ser
+          apagado depois.
+        </p>
+        {% endif %}
+      </td></tr>
+
+      <tr><td style="padding:18px 28px;border-top:1px solid #eceff1;background:#f5f7f8">
+        <p style="margin:0;font:400 11.5px/1.55 'Manrope',Helvetica,Arial,sans-serif;color:#84949c">
+          Life Laboral · plataforma de gestão de risco de máquinas<br>
+          Mensagem automática — não responda a este endereço.
+        </p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

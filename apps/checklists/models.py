@@ -84,6 +84,8 @@ class Assessment(RegistroTenant):
     denominador que torna duas máquinas comparáveis.
     """
 
+    caminho_para_cliente = "machine__client_id"
+
     machine = models.ForeignKey("ativos.Machine", on_delete=models.CASCADE, related_name="assessments")
     standard = models.CharField(max_length=10, choices=Standard.choices)
     library_base_count = models.PositiveSmallIntegerField("base fixa")
@@ -103,6 +105,8 @@ class Assessment(RegistroTenant):
 
 
 class ItemResultRecord(RegistroTenant):
+    caminho_para_cliente = "assessment__machine__client_id"
+
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="results")
     library_item = models.ForeignKey(LibraryItem, on_delete=models.PROTECT, related_name="results")
     result = models.CharField(max_length=16, choices=ItemResult.choices)

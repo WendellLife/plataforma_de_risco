@@ -1,0 +1,40 @@
+{% comment %}
+Conferência de integridade. Duas provas: hash do CONTEXTO (o que o documento afirma) e
+hash do BINÁRIO (o arquivo entregue). Divergência é incidente — bloco persistente.
+{% endcomment %}
+<div id="painel-integridade">
+{% if not versao %}
+<div class="empty__msg" style="margin:0">Documento ainda não publicado — não há binário a conferir.</div>
+{% elif conferencia.incidente %}
+<div class="blocker" style="margin:0">
+  <span class="blocker__rule">PROVA</span>
+  <span>
+    <span class="blocker__title">{{ conferencia.rotulo }}</span>
+    <span class="blocker__msg">
+      Esperado <span class="mono">{{ conferencia.esperado|slice:":16" }}</span>{% if conferencia.encontrado %} · encontrado <span class="mono">{{ conferencia.encontrado|slice:":16" }}</span>{% endif %}.
+      Recomponha o PDF desta versão. O conteúdo publicado não muda — a versão permanece imutável.
+    </span>
+  </span>
+</div>
+{% else %}
+<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+  <div>
+    <span class="stat__label">Integridade do binário</span>
+    <div style="font:700 14px/1.35 var(--font-display);color:{% if conferencia.veredito == 'confere' %}var(--ll-success){% else %}var(--text-muted){% endif %}">{{ conferencia.rotulo }}</div>
+  </div>
+  {% if versao.pdf_sha256 %}
+  <div>
+    <span class="stat__label">SHA-256 do PDF</span>
+    <div class="mono" style="font-size:11.5px;color:var(--text-body)">{{ versao.pdf_sha256|slice:":32" }}…</div>
+  </div>
+  {% endif %}
+  <div>
+    <span class="stat__label">Armazenamento</span>
+    <div style="font:400 13px/1.4 var(--font-body);color:var(--text-body)">{% if em_bucket %}Bucket privado · URL de leitura assinada{% else %}Disco local — efêmero, só para desenvolvimento{% endif %}</div>
+  </div>
+  <button class="btn btn--outline" style="margin-left:auto"
+          hx-get="{% url 'integridade_documento' documento.public_uuid %}"
+          hx-target="#painel-integridade" hx-swap="outerHTML">Conferir de novo</button>
+</div>
+{% endif %}
+</div>

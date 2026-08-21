@@ -1,0 +1,85 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Emissão em lote{% endblock %}
+{% block crumbs %}<span>Emissão em lote</span>{% endblock %}
+
+{% block conteudo %}
+{% include "ui/_shell/_sem_acesso.html" %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">Saídas</div>
+    <h1>Emissão em lote</h1>
+    <p>
+      Até {{ limite }} máquinas por lote. O sistema tria antes de enfileirar: você vê
+      quantas estão prontas e quais estão bloqueadas — com a regra nomeada — antes de
+      confirmar. Nenhuma emissão em lote afrouxa o verificador.
+    </p>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.total }}</div><span class="stat__label">Lotes solicitados</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.documentos_emitidos }}</div><span class="stat__label">Documentos emitidos</span></div>
+    <div><div class="stat__value" style="font-size:22px">{{ indicadores.em_execucao }}</div><span class="stat__label">Em execução</span></div>
+    <div><div class="stat__value {% if indicadores.com_falha %}stat__value--alert{% endif %}" style="font-size:22px">{{ indicadores.com_falha }}</div><span class="stat__label">Com alguma falha</span></div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <span class="stat__label" style="margin:0 0 12px">Novo lote</span>
+  <form hx-post="{% url 'planejar_lote' %}" hx-target="#plano" hx-swap="innerHTML"
+        style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+    {% csrf_token %}
+    <label style="display:grid;gap:4px">
+      <span class="stat__label" style="margin:0">Documento</span>
+      <select name="template_code" required style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:6px;font:400 13.5px/1.3 var(--font-body);background:#fff">
+        {% for t in templates %}<option value="{{ t.codigo }}">{{ t.codigo }} · {{ t.nome }}</option>{% endfor %}
+      </select>
+    </label>
+    <label style="display:grid;gap:4px">
+      <span class="stat__label" style="margin:0">Cliente</span>
+      <select name="client" style="padding:8px 10px;border:1px solid var(--border-strong);border-radius:6px;font:400 13.5px/1.3 var(--font-body);background:#fff;min-width:220px">
+        <option value="">Todo o parque</option>
+        {% for c in clientes %}<option value="{{ c.public_uuid }}">{{ c.legal_name }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="btn" type="submit">Planejar</button>
+    <span style="font:400 12.5px/1.5 var(--font-body);color:var(--text-muted);max-width:44ch">
+      Planejar roda o verificador em cada máquina. Leva alguns segundos e é o que evita
+      esperar meia hora por um lote que ia falhar.
+    </span>
+  </form>
+  <div id="plano" style="margin-top:14px"></div>
+</div>
+
+<div class="card">
+  <span class="stat__label" style="margin:0 0 12px">Lotes anteriores</span>
+  {% if lotes %}
+  <table class="table">
+    <thead><tr><th>Lote</th><th>Documento</th><th>Situação</th><th>Publicados</th><th>Falhas</th><th>Duração</th></tr></thead>
+    <tbody>
+      {% for l in lotes %}
+      <tr>
+        <td><a href="{% url 'lote' l.public_uuid %}" class="mono" style="font-size:12px">{{ l.number }}</a>
+          {% if l.client %}<div style="font:400 12px/1.4 var(--font-body);color:var(--text-muted)">{{ l.client.legal_name }}</div>{% endif %}
+        </td>
+        <td class="mono" style="font-size:12px">{{ l.template_code }}</td>
+        <td>
+          {% if l.status == 'done' %}<span class="pill pill--ok">Concluído</span>
+          {% elif l.status == 'partial' %}<span class="pill pill--danger">Com falhas</span>
+          {% elif l.status == 'running' %}<span class="pill">Em execução · {{ l.percentual }}%</span>
+          {% elif l.status == 'cancelled' %}<span class="pill">Cancelado</span>
+          {% else %}<span class="pill">Planejado</span>{% endif %}
+        </td>
+        <td class="mono">{{ l.published_count }}/{{ l.requested_count }}</td>
+        <td class="mono">{% if l.failed_count %}<span class="pill pill--danger">{{ l.failed_count }}</span>{% else %}0{% endif %}</td>
+        <td class="mono" style="font-size:12px">{% if l.duracao_minutos %}{{ l.duracao_minutos }} min{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty__msg">Nenhum lote solicitado ainda.</div>
+  {% endif %}
+</div>
+{% endblock %}

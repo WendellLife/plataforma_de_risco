@@ -1,0 +1,204 @@
+{% extends "documentos/_base.html" %}
+{% load documentos_tags %}
+
+{% comment %}
+DOC01 · Análise de Risco (GR.AR.6.9 rev. 3).
+Seções e numeração vêm do catálogo — este template não inventa estrutura.
+{% endcomment %}
+
+{% block corpo %}
+
+<h2 class="secao">{{ secoes|secao:1 }}</h2>
+<h3 class="sub">1.1 Contratante</h3>
+<div class="grade2">
+  <div class="campo"><span class="campo__rotulo">Razão social</span><span class="campo__valor">{{ ident.cliente.razao_social }}</span></div>
+  <div class="campo"><span class="campo__rotulo">CNPJ</span><span class="campo__valor">{{ ident.cliente.cnpj }}</span></div>
+  <div class="campo"><span class="campo__rotulo">CNAE</span><span class="campo__valor">{{ ident.cliente.cnae|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Município · UF</span><span class="campo__valor">{{ ident.cliente.municipio|default:"—" }}{% if ident.cliente.uf %} · {{ ident.cliente.uf }}{% endif %}</span></div>
+  <div class="campo"><span class="campo__rotulo">Unidade apreciada</span><span class="campo__valor">{{ ident.unidade|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Contato</span><span class="campo__valor">{{ ident.cliente.contato|default:"—" }}</span></div>
+</div>
+
+<h3 class="sub">1.2 Máquina apreciada</h3>
+<div class="grade2">
+  <div class="campo"><span class="campo__rotulo">Identificação</span><span class="campo__valor">{{ ident.maquina.identificacao }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Tipo</span><span class="campo__valor">{{ ident.maquina.tipo }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Fabricante</span><span class="campo__valor">{{ ident.maquina.fabricante|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Modelo</span><span class="campo__valor">{{ ident.maquina.modelo|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Número de série</span><span class="campo__valor">{{ ident.maquina.serie|default:"não localizado" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Patrimônio</span><span class="campo__valor">{{ ident.maquina.patrimonio|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Ano de fabricação</span><span class="campo__valor">{{ ident.maquina.ano|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Capacidade</span><span class="campo__valor">{{ ident.maquina.capacidade|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Anexos NR-12 aplicáveis</span><span class="campo__valor">{% for a in ident.maquina.anexos %}{{ a }}{% if not forloop.last %} · {% endif %}{% empty %}não definidos{% endfor %}</span></div>
+  <div class="campo"><span class="campo__rotulo">Peso</span><span class="campo__valor">{% if ident.maquina.peso %}{{ ident.maquina.peso|numero }} kg{% else %}—{% endif %}</span></div>
+</div>
+
+<h3 class="sub">1.3 Responsabilidade técnica</h3>
+<div class="grade2">
+  <div class="campo"><span class="campo__rotulo">Engenheiro responsável</span><span class="campo__valor">{{ ident.responsavel.nome|default:"não vinculado" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Registro profissional</span><span class="campo__valor">{{ ident.responsavel.registro|default:"não informado" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">Título</span><span class="campo__valor">{{ ident.responsavel.titulo|default:"—" }}</span></div>
+  <div class="campo"><span class="campo__rotulo">ART</span><span class="campo__valor">{{ ident.projeto.art|default:"não registrada" }}</span></div>
+</div>
+
+<h2 class="secao">{{ secoes|secao:2 }}</h2>
+<p>Este documento apresenta a apreciação de risco da máquina {{ ident.maquina.identificacao }}, conduzida conforme o processo iterativo da ABNT NBR ISO 12100 e os requisitos da NR-12, com o objetivo de identificar os perigos, estimar os riscos, propor medidas de proteção na ordem de prioridade da norma e reestimar o risco residual.</p>
+<p>O escopo cobre a máquina nas fases de vida de operação, preparação, limpeza e manutenção, incluindo as zonas de perigo acessíveis ao operador e ao pessoal de manutenção. Não estão no escopo instalações prediais, utilidades a montante da fonte de energia da máquina e riscos ocupacionais alheios ao equipamento.</p>
+<p>As conclusões desta apreciação valem para o estado da máquina no momento da vistoria. Qualquer modificação de comando, proteção, ferramental ou modo de operação exige nova apreciação.</p>
+
+<h2 class="secao">{{ secoes|secao:3 }}</h2>
+{% for n in d.normas %}
+<div style="display:grid;grid-template-columns:44mm 1fr;gap:5mm;padding:2.2mm 0;border-bottom:.75pt solid var(--border-subtle)">
+  <span style="font:700 9pt/1.4 var(--font-body);color:var(--ll-blue-700)">{{ n.codigo }}</span>
+  <span style="font:400 9pt/1.45 var(--font-body)">{{ n.titulo }}</span>
+</div>
+{% endfor %}
+
+<h2 class="secao">{{ secoes|secao:4 }}</h2>
+<h3 class="sub">4.1 Processo iterativo</h3>
+<p>A apreciação segue o processo da ABNT NBR ISO 12100: determinação dos limites da máquina, identificação dos perigos, estimativa do risco, avaliação do risco e, quando necessário, redução do risco pela ordem de prioridade — projeto intrinsecamente seguro, proteções e medidas complementares, e informação de uso. Cada iteração é registrada como estimativa própria, e não como sobrescrita da anterior.</p>
+<h3 class="sub">4.2 Estimativa por HRN</h3>
+<p>A estimativa emprega o método HRN (Hazard Rating Number), versão {{ method_versions.hrn }} do motor de cálculo, no qual o risco resulta do produto de quatro fatores: probabilidade de ocorrência (LO), frequência de exposição (FE), gravidade do dano (DPH) e número de pessoas expostas (NP). O cálculo é feito no servidor; o documento nunca recebe um índice digitado à mão.</p>
+<div class="nota nota--info" style="text-align:center">
+  <span style="font:700 13pt/1.4 var(--font-display);color:var(--ll-teal-700)">HRN = LO × FE × DPH × NP</span>
+</div>
+
+<h2 class="secao">{{ secoes|secao:5 }}</h2>
+{% if d.limites %}
+{% for l in d.limites %}
+<div class="campo"><span class="campo__rotulo">{{ l.nome }}</span><span class="campo__valor">{{ l.valor }}</span></div>
+{% endfor %}
+{% else %}
+<p>Limites da máquina não registrados no cadastro. A determinação dos limites de uso, espaço, tempo e demais limites é pré-requisito do item 5.3 da ABNT NBR ISO 12100 e deve ser completada antes da revisão final deste documento.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:6 }}</h2>
+<table>
+  <thead><tr><th>Fonte</th><th class="num">Magnitude</th><th>Ponto de bloqueio</th><th>Dispositivo</th></tr></thead>
+  <tbody>
+    {% for f in d.fontes %}
+    <tr>
+      <td>{{ f.tipo }}{% if f.observacao %}<br><span style="font-size:7.5pt;color:var(--text-muted)">{{ f.observacao }}</span>{% endif %}</td>
+      <td class="num">{{ f.magnitude|numero }} {{ f.unidade }}</td>
+      <td>{% if f.bloqueavel %}{{ f.ponto }} — {{ f.local }}{% else %}<span class="faixa faixa--alto">não identificado</span>{% endif %}</td>
+      <td>{{ f.dispositivo|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Nenhuma fonte de energia cadastrada.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if d.fontes_sem_bloqueio %}
+<p class="nota nota--erro">{{ d.fontes_sem_bloqueio|length }} de {{ d.fontes|length }} fonte(s) de energia sem ponto de bloqueio identificado. Enquanto persistir, o procedimento LOTO e o laudo técnico de adequação não podem ser emitidos (regra D-01).</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:7 }}</h2>
+{% if d.fotos %}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5mm">
+  {% for foto in d.fotos %}
+  <div style="break-inside:avoid">
+    <div style="height:34mm;background:var(--ll-slate-100);border-radius:2mm"></div>
+    <span style="display:block;margin-top:1.5mm;font:600 7.5pt/1.35 var(--font-body);color:var(--text-muted)">{{ foto.slot }}{% if foto.legenda %} — {{ foto.legenda }}{% endif %}</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>Nenhuma evidência fotográfica vinculada a esta máquina. O registro fotográfico é coletado pelo aplicativo de campo e cada foto é vinculada à zona de perigo ou ao item de checklist correspondente.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:8 }}</h2>
+{% if d.riscos %}
+<p>{{ d.riscos|length }} zona(s) de perigo apreciada(s) nesta revisão. Cada bloco traz a estimativa inicial, as medidas de proteção propostas na ordem de prioridade da ISO 12100 e a reestimativa do risco residual.</p>
+{% for r in d.riscos %}
+<div class="risco">
+  <div class="risco__cabecalho">
+    <span class="risco__zona">8.{{ forloop.counter }} {{ r.zona }} — {{ r.titulo }}</span>
+    <span class="risco__tipo">{{ r.tipo }} · {{ r.fase }}</span>
+  </div>
+  {% if r.descricao %}<p style="font-size:9.5pt">{{ r.descricao }}</p>{% endif %}
+  {% if r.tarefa %}<div class="campo"><span class="campo__rotulo">Tarefa associada</span><span class="campo__valor">{{ r.tarefa }}</span></div>{% endif %}
+  {% if r.medidas_existentes %}<div class="campo"><span class="campo__rotulo">Medidas existentes</span><span class="campo__valor">{{ r.medidas_existentes }}</span></div>{% endif %}
+
+  <h3 class="sub" style="margin:4mm 0 2mm">Estimativa inicial</h3>
+  {% if r.fatores_inicial %}
+  <div class="hrn">
+    <div class="hrn__cel"><span class="hrn__rotulo">LO</span><span class="hrn__valor">{{ r.fatores_inicial.lo|numero }}</span></div>
+    <div class="hrn__cel"><span class="hrn__rotulo">FE</span><span class="hrn__valor">{{ r.fatores_inicial.fe|numero }}</span></div>
+    <div class="hrn__cel"><span class="hrn__rotulo">DPH</span><span class="hrn__valor">{{ r.fatores_inicial.dph|numero }}</span></div>
+    <div class="hrn__cel"><span class="hrn__rotulo">NP</span><span class="hrn__valor">{{ r.fatores_inicial.np|numero }}</span></div>
+    <div class="hrn__cel hrn__cel--total"><span class="hrn__rotulo">HRN</span><span class="hrn__valor">{{ r.hrn_inicial|numero }}</span></div>
+  </div>
+  <p style="margin:0 0 2mm"><span class="faixa {{ r.faixa_inicial|classe_faixa }}">{{ r.rotulo_inicial }}</span></p>
+  {% else %}
+  <p class="nota nota--erro" style="margin-top:0">Zona sem estimativa inicial registrada — a apreciação desta zona está incompleta.</p>
+  {% endif %}
+
+  {% if r.medidas %}
+  <h3 class="sub" style="margin:4mm 0 2mm">Medidas de proteção propostas</h3>
+  <table>
+    <thead><tr><th>Etapa ISO 12100</th><th>Medida</th><th>Dispositivo</th><th class="num">Prazo</th></tr></thead>
+    <tbody>
+      {% for m in r.medidas %}
+      <tr>
+        <td>{{ m.etapa }}</td>
+        <td>{{ m.texto }}{% if m.referencia %}<br><span style="font-size:7.5pt;color:var(--ll-blue-700)">{{ m.referencia }}</span>{% endif %}</td>
+        <td>{{ m.dispositivo|default:"—" }}</td>
+        <td class="num">{% if m.prazo %}{{ m.prazo }} d{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if r.fatores_residual %}
+  <h3 class="sub" style="margin:4mm 0 2mm">Risco residual reestimado</h3>
+  <div class="hrn">
+    <div class="hrn__cel"><span class="hrn__rotulo">LO</span><span class="hrn__valor">{{ r.fatores_residual.lo|numero }}</span></div>
+    <div class="hrn__cel"><span class="hrn__rotulo">FE</span><span class="hrn__valor">{{ r.fatores_residual.fe|numero }}</span></div>
+    <div class="hrn__cel"><span class="hrn__rotulo">DPH</span><span class="hrn__valor">{{ r.fatores_residual.dph|numero }}</span></div>
+    <div class="hrn__cel"><span class="hrn__rotulo">NP</span><span class="hrn__valor">{{ r.fatores_residual.np|numero }}</span></div>
+    <div class="hrn__cel hrn__cel--total"><span class="hrn__rotulo">HRN</span><span class="hrn__valor">{{ r.hrn_residual|numero }}</span></div>
+  </div>
+  <p style="margin:0"><span class="faixa {{ r.faixa_residual|classe_faixa }}">{{ r.rotulo_residual }}</span>
+  {% if r.categoria %}<span style="margin-left:4mm;font:600 8.5pt/1.3 var(--font-body);color:var(--text-muted)">{{ r.categoria }}</span>{% endif %}</p>
+  {% elif r.medidas %}
+  <p class="nota nota--erro">Medida de proteção proposta sem reestimativa de HRN. Sem o risco residual não é possível afirmar que a medida reduz o risco a nível tolerável (regra D-03).</p>
+  {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<p>Nenhuma zona de perigo registrada para esta máquina. Uma análise de risco sem zona de perigo apreciada não tem conteúdo técnico e não deve ser publicada.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:9 }}</h2>
+{% if consolidacao %}
+<table style="break-inside:avoid">
+  <thead><tr><th>Indicador</th><th class="num">Antes das medidas</th><th class="num">Depois das medidas</th></tr></thead>
+  <tbody>
+    <tr><td>Zonas de perigo apreciadas</td><td class="num">{{ consolidacao.total }}</td><td class="num">{{ consolidacao.total }}</td></tr>
+    <tr><td>Zonas em faixa intolerável</td><td class="num">{{ consolidacao.intoleraveis_antes }}</td><td class="num">{{ consolidacao.intoleraveis_depois }}</td></tr>
+    <tr><td>Maior HRN registrado</td><td class="num">{{ consolidacao.maior_hrn_inicial|numero }}</td><td class="num">{{ consolidacao.maior_hrn_residual|numero }}</td></tr>
+    <tr><td>Zonas sem risco residual reestimado</td><td class="num">—</td><td class="num">{{ consolidacao.sem_residual }}</td></tr>
+  </tbody>
+</table>
+<p style="margin-top:4mm">Redução do maior HRN da máquina: <strong>{{ consolidacao.reducao_percentual|numero }}%</strong>, considerando as medidas propostas implantadas na íntegra.</p>
+{% else %}
+<p>Sem estimativas registradas, não há consolidação a apresentar.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:10 }}</h2>
+{% if consolidacao %}
+<p>No estado encontrado, a máquina {{ ident.maquina.identificacao }} apresenta {{ consolidacao.intoleraveis_antes }} zona(s) de perigo em faixa intolerável, sendo o maior índice HRN igual a {{ consolidacao.maior_hrn_inicial|numero }}.</p>
+<p>Implantadas as medidas de proteção propostas nesta apreciação, {{ consolidacao.intoleraveis_depois }} zona(s) permanece(m) em faixa intolerável e o maior índice cai para {{ consolidacao.maior_hrn_residual|numero }}.</p>
+{% if consolidacao.sem_residual %}
+<p>{{ consolidacao.sem_residual }} zona(s) tem medida proposta sem risco residual reestimado. Enquanto a reestimativa não for concluída, esta análise não sustenta conclusão de adequação e o laudo técnico não pode ser emitido.</p>
+{% endif %}
+{% endif %}
+{% if d.fontes_sem_bloqueio %}
+<p>Independentemente das medidas por zona, as fontes de energia sem ponto de bloqueio identificado impedem a elaboração do procedimento LOTO e, com ele, qualquer intervenção segura de manutenção.</p>
+{% endif %}
+
+<h2 class="secao">{{ secoes|secao:11 }}</h2>
+<p>A apreciação de risco aqui apresentada foi conduzida sob responsabilidade técnica do profissional identificado abaixo, com registro no respectivo conselho profissional e Anotação de Responsabilidade Técnica vinculada ao projeto {{ ident.projeto.numero|default:"—" }}.</p>
+
+{% endblock %}

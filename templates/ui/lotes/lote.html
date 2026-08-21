@@ -1,0 +1,29 @@
+{% extends "ui/_shell/base.html" %}
+{% block titulo %}Lote {{ lote.number }}{% endblock %}
+{% block crumbs %}<a href="{% url 'lotes' %}">Emissão em lote</a><span>›</span><span class="mono">{{ lote.number }}</span>{% endblock %}
+
+{% block conteudo %}
+<div class="pagehead">
+  <div>
+    <div class="eyebrow">{{ lote.template_code }}{% if lote.client %} · {{ lote.client.legal_name }}{% endif %}</div>
+    <h1>Lote {{ lote.number }}</h1>
+    <p>
+      {{ lote.requested_count }} documento(s) solicitado(s){% if lote.skipped_count %}, {{ lote.skipped_count }} máquina(s) fora por bloqueio{% endif %}.
+      Você pode fechar esta tela: o resultado fica registrado e cada documento publicado é
+      uma versão imutável com seu próprio hash.
+    </p>
+  </div>
+  {% if lote.status == 'running' or lote.status == 'planned' %}
+  <form method="post" action="{% url 'cancelar_lote' lote.public_uuid %}">
+    {% csrf_token %}
+    <button class="btn btn--outline" type="submit">Cancelar o que falta</button>
+  </form>
+  {% endif %}
+</div>
+
+<div hx-get="{% url 'lote' lote.public_uuid %}"
+     {% if lote.status == 'running' %}hx-trigger="load, every 4s"{% else %}hx-trigger="load"{% endif %}
+     hx-swap="innerHTML">
+  {% include "ui/lotes/_progresso.html" %}
+</div>
+{% endblock %}

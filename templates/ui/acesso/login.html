@@ -1,0 +1,111 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entrar · Life Laboral</title>
+<meta name="theme-color" content="#12232e">
+<link rel="icon" href="{% static 'ds/logos/favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'ds/tokens/fonts.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/colors.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/typography.css' %}">
+<link rel="stylesheet" href="{% static 'ds/tokens/effects.css' %}">
+<link rel="stylesheet" href="{% static 'ds/app.css' %}">
+<style>
+  body {
+    margin: 0; min-height: 100vh; display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    background: var(--surface-page); color: var(--text-body);
+    font-family: var(--font-body); -webkit-font-smoothing: antialiased;
+  }
+  .marca {
+    background: var(--ll-ink); color: #fff;
+    padding: 48px 52px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .marca__logo { height: 30px; width: auto; align-self: flex-start; }
+  .marca__frase {
+    margin: 0; max-width: 26ch;
+    font: 800 34px/1.15 var(--font-display); letter-spacing: -.03em; color: #fff;
+    text-wrap: pretty;
+  }
+  .marca__apoio {
+    margin: 14px 0 0; max-width: 42ch;
+    font: 400 14.5px/1.6 var(--font-body); color: rgba(255,255,255,.72); text-wrap: pretty;
+  }
+  .marca__rodape {
+    font: 400 11.5px/1.5 var(--font-body); color: rgba(255,255,255,.45);
+  }
+  .painel { display: grid; place-items: center; padding: 40px 32px; }
+  .form { width: 100%; max-width: 372px; }
+  .form h1 {
+    margin: 0 0 6px; font: 800 27px/1.2 var(--font-display);
+    letter-spacing: -.025em; color: var(--text-strong);
+  }
+  .form p.sub { margin: 0 0 26px; font-size: 14.5px; color: var(--text-muted); }
+  label { display: grid; gap: 5px; margin-bottom: 15px; }
+  label span {
+    font: 700 11px/1 var(--font-display); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  input {
+    min-height: 44px; padding: 0 14px; border-radius: 10px;
+    border: 1.5px solid var(--border-strong); background: var(--surface-card);
+    font: 400 14.5px/1 var(--font-body); color: var(--text-body);
+  }
+  input:focus { outline: 2px solid var(--focus-ring); outline-offset: 1px; border-color: var(--color-primary); }
+  .btn { width: 100%; justify-content: center; min-height: 46px; }
+  .erro {
+    margin: 0 0 18px; padding: 12px 14px; border-radius: 10px;
+    background: var(--ll-danger-bg); border: 1px solid var(--ll-danger);
+    font: 400 13.5px/1.5 var(--font-body); color: var(--ll-danger);
+  }
+  .apoio { margin: 20px 0 0; font-size: 13px; color: var(--text-muted); }
+  @media (max-width: 900px) {
+    body { grid-template-columns: 1fr; }
+    .marca { padding: 30px 26px; gap: 22px; }
+    .marca__frase { font-size: 25px; }
+  }
+</style>
+</head>
+<body>
+<aside class="marca">
+  <img class="marca__logo" src="{% static 'ds/logos/logo-horizontal-branca.png' %}" alt="Life Laboral">
+  <div>
+    <p class="marca__frase">O laudo que não pode ser assinado diz por quê.</p>
+    <p class="marca__apoio">
+      Apreciação de risco, conformidade e emissão de documento técnico com verificação
+      antes da assinatura — e prova depois dela.
+    </p>
+  </div>
+  <span class="marca__rodape">Life Laboral · plataforma de gestão de risco de máquinas</span>
+</aside>
+
+<main class="painel">
+  <form class="form" method="post">
+    {% csrf_token %}
+    <h1>Entrar</h1>
+    <p class="sub">Use o e-mail cadastrado pela sua organização.</p>
+
+    {% if form.errors %}
+    <p class="erro">
+      E-mail ou senha não conferem. Se você recebeu acesso hoje, confirme com quem
+      administra a sua organização se o cadastro foi concluído.
+    </p>
+    {% endif %}
+
+    <label>
+      <span>E-mail</span>
+      <input type="email" name="username" autocomplete="username" required autofocus>
+    </label>
+    <label>
+      <span>Senha</span>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button class="btn" type="submit">Entrar</button>
+    <p class="apoio">
+      Esqueceu a senha? <a href="{% url 'recuperar_senha' %}">Receber link de redefinição</a>.
+    </p>
+  </form>
+</main>
+</body>
+</html>

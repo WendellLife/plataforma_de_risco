@@ -1,0 +1,78 @@
+{% comment %}
+Resultado do cálculo ao vivo. Único lugar que imprime produto e faixa — a prévia e a
+estimativa gravada usam este MESMO bloco; só muda o selo de estado.
+{% endcomment %}
+{% if erro %}
+<div class="blocker" style="margin:0">
+  <span class="blocker__rule">HRN</span>
+  <span>
+    <span class="blocker__title">{{ erro }}</span>
+    <span class="blocker__msg">Os quatro fatores são obrigatórios: o produto HRN não existe pela metade.</span>
+  </span>
+</div>
+{% elif resultado %}
+<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+  <div>
+    <span class="stat__label">HRN {{ rotulo_tipo|lower }}</span>
+    <div class="stat__value" style="font-size:34px">{{ resultado.produto|floatformat:"-3" }}</div>
+  </div>
+  <div>
+    <span class="stat__label">Faixa</span>
+    <div class="stat__value {% if not resultado.band in toleraveis %}stat__value--alert{% endif %}" style="font-size:22px">{{ resultado.rotulo }}</div>
+  </div>
+  {% if comparacao %}
+  <div>
+    <span class="stat__label">Movimento</span>
+    <div class="stat__value" style="font-size:22px">
+      {{ comparacao.inicial.rotulo }} → {{ comparacao.residual.rotulo }}
+    </div>
+  </div>
+  <div>
+    <span class="stat__label">Redução</span>
+    <div class="stat__value {% if comparacao.piorou %}stat__value--alert{% endif %}" style="font-size:22px">{{ comparacao.reducao_percentual }}%</div>
+  </div>
+  {% endif %}
+  <span class="pill {% if salvo %}pill--ok{% endif %}" style="margin-left:auto">
+    {% if salvo %}Gravado · método {{ method_version }}{% else %}Prévia — nada gravado{% endif %}
+  </span>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:14px">
+  {% for f in escala %}
+  <div style="padding:7px 5px;border-radius:5px;text-align:center;{% if f.atual %}background:var(--ll-accent);color:#fff{% else %}background:var(--surface-sunken);color:var(--text-muted){% endif %}">
+    <div style="font:700 10.5px/1.2 var(--font-display)">{{ f.rotulo }}</div>
+    <div class="mono" style="font-size:10px;opacity:.85">{% if f.ate %}≤ {{ f.ate }}{% else %}&gt; 1000{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if comparacao and comparacao.exige_decisao %}
+<div class="blocker" style="margin-top:14px">
+  <span class="blocker__rule">AD-07</span>
+  <span>
+    <span class="blocker__title">Risco residual fora da faixa tolerável</span>
+    <span class="blocker__msg">
+      Gravar é permitido, mas a publicação exigirá decisão registrada com autor
+      justificando a aceitação — ou uma medida adicional que baixe o residual.
+    </span>
+  </span>
+</div>
+{% endif %}
+
+{% if pendencia_d03 %}
+<div class="blocker" style="margin-top:14px">
+  <span class="blocker__rule">D-03</span>
+  <span>
+    <span class="blocker__title">Esta zona já tem medida proposta e nenhum residual</span>
+    <span class="blocker__msg">Gravar o inicial não libera a publicação: estime também o residual.</span>
+  </span>
+</div>
+{% endif %}
+
+{% if aviso_metodo %}
+<div class="blocker" style="margin-top:14px">
+  <span class="blocker__rule">HRN</span>
+  <span><span class="blocker__title">{{ aviso_metodo }}</span></span>
+</div>
+{% endif %}
+{% endif %}

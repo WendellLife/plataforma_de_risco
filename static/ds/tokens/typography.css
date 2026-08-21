@@ -1,10 +1,13 @@
 /* Life Laboral — Typography tokens
- * True brand font is Codec Pro (commercial). Poppins stands in for display —
- * it is itself embedded in the brand's receituário — and Figtree for body.
+ * True brand font is Codec Pro (commercial). Manrope stands in for it: geometric
+ * semi-condensed, the closest free match to Codec Pro's engineered proportions.
+ * One family for display and body — a single voice, and it holds up at 8.5pt on paper.
  */
 :root {
-  --font-display: 'Poppins', system-ui, sans-serif;
-  --font-body:    'Figtree', system-ui, sans-serif;
+  --font-display: 'Manrope', system-ui, sans-serif;
+  --font-body:    'Manrope', system-ui, sans-serif;
+  /* Números, hashes e códigos de documento: alinhamento tabular é requisito, não estilo. */
+  --font-mono:    'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
   /* The true brand face is Codec Pro (commercial) — see tokens/fonts.css.
      Once licensed, point --font-display/--font-body at it there. */
 
